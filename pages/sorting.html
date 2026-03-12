@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sorting – Android Compose Guide</title>
+  <script>(function(){ document.documentElement.dataset.theme = localStorage.getItem('guide-theme') || 'light'; })();</script>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+</head>
+<body data-page="sorting">
+<div id="nav-container"></div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-heading">Sorting</div>
+    <a href="#basics">sorted / sortedBy</a>
+    <a href="#comparator">Comparator</a>
+    <a href="#multi-field">Multiple Fields</a>
+    <a href="#nulls">Nulls &amp; Reverse</a>
+    <a href="#custom">Custom Comparator</a>
+    <a href="#in-place">In-place Sort</a>
+    <a href="#flow-sort">Sorting in Flow / ViewModel</a>
+  </aside>
+
+  <main class="content">
+    <div class="page-hero">
+      <h1>Sorting with Kotlin</h1>
+      <p>Comparators, multi-field ordering, null handling, and real-world ViewModel patterns.</p>
+    </div>
+
+    <!-- BASICS -->
+    <div class="subsection" id="basics">
+      <div class="sub-header">
+        <h2>sorted / sortedBy</h2>
+        <a class="doc-link" href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/sorted-by.html" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc"><code>sorted()</code> uses natural order. <code>sortedBy { }</code> extracts a single <code>Comparable</code> key. Both return a new list — the original is never mutated.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-basics-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-basics-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPARATOR -->
+    <div class="subsection" id="comparator">
+      <div class="sub-header">
+        <h2>Comparator</h2>
+        <a class="doc-link" href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.comparisons/" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc"><code>compareBy { }</code> builds a <code>Comparator</code> from a key selector. Pass it to <code>sortedWith()</code>. Chain multiple selectors as varargs for tie-breaking.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-comp-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-comp-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>Comparator contract:</strong> Returns negative if first &lt; second, zero if equal, positive if first &gt; second. All Kotlin sort functions rely on this.</p>
+            <p><strong>compareBy vs Comparator { a, b -&gt; }:</strong> <code>compareBy</code> is the idiomatic Kotlin way — it extracts keys and uses their natural <code>compareTo</code>. The lambda form gives you full control for unusual ordering.</p>
+            <p><strong>Performance:</strong> Keys extracted by <code>compareBy</code> are evaluated once per element per comparison — not cached. For expensive key extraction (e.g. parsing), pre-map to a <code>Pair</code> first (Schwartzian transform).</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- MULTI-FIELD -->
+    <div class="subsection" id="multi-field">
+      <div class="sub-header">
+        <h2>Multiple Fields</h2>
+        <a class="doc-link" href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.comparisons/then-by.html" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Chain comparators with <code>thenBy { }</code> / <code>thenByDescending { }</code> to break ties. Or pass multiple selectors directly to <code>compareBy()</code>.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-multi-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-multi-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>compareBy varargs:</strong> <code>compareBy({ it.lastName }, { it.firstName })</code> is exactly equivalent to <code>compareBy { it.lastName }.thenBy { it.firstName }</code> — use whichever reads better.</p>
+            <p><strong>Mixed asc/desc:</strong> <code>compareBy</code> only does ascending. Mix with <code>thenByDescending</code> or negate: <code>compareByDescending { it.score }.thenBy { it.name }</code>.</p>
+            <p><strong>Stable sort:</strong> Kotlin's <code>sortedWith</code> uses a stable sort (TimSort) — equal elements keep their original relative order. Safe to chain sorts.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- NULLS & REVERSE -->
+    <div class="subsection" id="nulls">
+      <div class="sub-header">
+        <h2>Nulls &amp; Reverse</h2>
+        <a class="doc-link" href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.comparisons/nulls-first.html" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Handle nullable fields with <code>nullsFirst()</code> / <code>nullsLast()</code>. Reverse any comparator with <code>reversed()</code> or use <code>sortedByDescending</code> for simple cases.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-nulls-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-nulls-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUSTOM COMPARATOR -->
+    <div class="subsection" id="custom">
+      <div class="sub-header">
+        <h2>Custom Comparator</h2>
+      </div>
+      <p class="sub-desc">Write a <code>Comparator</code> lambda when ordering doesn't map to a simple key — e.g. priority enums, locale-aware strings, or domain-specific rules.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-custom-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-custom-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- IN-PLACE -->
+    <div class="subsection" id="in-place">
+      <div class="sub-header">
+        <h2>In-place Sort</h2>
+        <a class="doc-link" href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/sort-with.html" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc"><code>sorted*()</code> returns a new list. <code>sort*()</code> / <code>sortWith()</code> mutates a <code>MutableList</code> in place — useful when you own the list and want to avoid allocation.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-inplace-q" class="language-kotlin"></code></pre>
+      </div>
+    </div>
+
+    <!-- FLOW / VIEWMODEL -->
+    <div class="subsection" id="flow-sort">
+      <div class="sub-header">
+        <h2>Sorting in Flow / ViewModel</h2>
+      </div>
+      <p class="sub-desc">Sort order is UI state — expose a <code>SortOrder</code> enum from the ViewModel and combine it with the data flow using <code>combine()</code>. No need to re-fetch from the database.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-flowsort-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-flowsort-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const CODE = {};
+
+CODE['basics-q'] = `data class Product(val name: String, val price: Double, val rating: Float)
+
+val products = listOf(
+    Product("Keyboard", 79.99, 4.5f),
+    Product("Mouse",    29.99, 4.2f),
+    Product("Monitor", 299.99, 4.8f),
+)
+
+// Natural order (requires Comparable)
+val sortedInts = listOf(3, 1, 4, 1, 5).sorted()          // [1, 1, 3, 4, 5]
+
+// Single key ascending
+val byName  = products.sortedBy { it.name }               // alphabetical
+val byPrice = products.sortedBy { it.price }              // cheapest first
+
+// Single key descending
+val byRatingDesc = products.sortedByDescending { it.rating }`;
+
+CODE['basics-f'] = `// sortedBy on nested / computed key
+data class Order(val id: Int, val customer: Customer, val total: Double)
+data class Customer(val lastName: String, val firstName: String)
+
+val orders = listOf<Order>(/* ... */)
+
+// Sort by nested field
+val byLastName = orders.sortedBy { it.customer.lastName }
+
+// Sort by computed value
+val byDiscount = orders.sortedBy { it.total * 0.1 }     // 10% discount ascending
+
+// String sorting — case-insensitive
+val names = listOf("banana", "Apple", "cherry")
+val caseInsensitive = names.sortedBy { it.lowercase() }  // [Apple, banana, cherry]
+
+// Enum natural order (ordinal)
+enum class Priority { LOW, MEDIUM, HIGH }
+data class Task(val title: String, val priority: Priority)
+
+val tasks = listOf(
+    Task("Fix bug",    Priority.HIGH),
+    Task("Write docs", Priority.LOW),
+    Task("Review PR",  Priority.MEDIUM),
+)
+val byPriority = tasks.sortedBy { it.priority }          // LOW, MEDIUM, HIGH
+val urgentFirst = tasks.sortedByDescending { it.priority } // HIGH, MEDIUM, LOW`;
+
+CODE['comp-q'] = `// compareBy builds a Comparator from a key selector
+val byPrice = compareBy<Product> { it.price }
+val sorted  = products.sortedWith(byPrice)
+
+// compareByDescending — single field, descending
+val byRatingDesc = compareByDescending<Product> { it.rating }
+val topRated = products.sortedWith(byRatingDesc)
+
+// Inline with sortedWith
+val result = products.sortedWith(compareBy { it.name })`;
+
+CODE['comp-f'] = `// Manual Comparator lambda — full control
+val byNameLength = Comparator<Product> { a, b ->
+    a.name.length.compareTo(b.name.length)
+}
+
+// SAM conversion shorthand (same thing)
+val byNameLength2: Comparator<Product> = Comparator { a, b ->
+    a.name.length - b.name.length     // works for Int; avoid for Long/Double (overflow)
+}
+
+// compareValuesBy — compare two objects field-by-field inline
+val comp = Comparator<Product> { a, b ->
+    compareValuesBy(a, b,
+        { it.price },    // primary: price ascending
+        { it.name },     // tiebreak: name ascending
+    )
+}
+
+// Natural order comparator for Comparable types
+val naturalOrder: Comparator<Int> = naturalOrder()
+val reverseOrder: Comparator<Int> = reverseOrder()`;
+
+CODE['multi-q'] = `data class Employee(val lastName: String, val firstName: String, val salary: Double, val dept: String)
+
+val employees = listOf<Employee>(/* ... */)
+
+// compareBy with multiple selectors (tiebreaker chain)
+val byName = compareBy<Employee>(
+    { it.lastName },    // primary sort
+    { it.firstName },   // tiebreaker
+)
+val sorted = employees.sortedWith(byName)
+
+// thenBy / thenByDescending chaining
+val byDeptThenSalary = compareBy<Employee> { it.dept }
+    .thenByDescending { it.salary }   // within dept, highest salary first
+    .thenBy { it.lastName }           // within salary, alphabetical
+
+val result = employees.sortedWith(byDeptThenSalary)`;
+
+CODE['multi-f'] = `data class Match(
+    val homeTeam: String,
+    val awayTeam: String,
+    val homeGoals: Int,
+    val awayGoals: Int,
+    val date: LocalDate,
+)
+
+// League table sort: most points → goal difference → goals scored → name
+data class TeamStanding(val name: String, val points: Int, val goalDiff: Int, val goalsFor: Int)
+
+val leagueTable = standings.sortedWith(
+    compareByDescending<TeamStanding> { it.points }
+        .thenByDescending { it.goalDiff }
+        .thenByDescending { it.goalsFor }
+        .thenBy { it.name }            // alphabetical tiebreaker
+)
+
+// Mix ascending and descending in one chain
+data class Product(val category: String, val name: String, val price: Double, val stock: Int)
+
+val display = products.sortedWith(
+    compareBy<Product> { it.category }          // category A→Z
+        .thenBy { it.name }                     // name A→Z within category
+        .thenByDescending { it.stock }          // most in-stock first
+        .thenBy { it.price }                    // cheapest last tiebreaker
+)
+
+// Three-way sort on a search results list
+data class SearchResult(val title: String, val score: Float, val isPinned: Boolean)
+
+val ranked = results.sortedWith(
+    compareByDescending<SearchResult> { it.isPinned }  // pinned first
+        .thenByDescending { it.score }                 // then by relevance
+        .thenBy { it.title }                           // alpha tiebreaker
+)`;
+
+CODE['nulls-q'] = `data class User(val name: String, val age: Int?)
+
+val users = listOf(
+    User("Alice", 30),
+    User("Bob",   null),
+    User("Carol", 25),
+)
+
+// nullsLast — null ages sort to the end
+val byAge = users.sortedWith(
+    compareBy(nullsLast<Int>()) { it.age }
+)
+// Result: Carol(25), Alice(30), Bob(null)
+
+// nullsFirst — null ages sort to the front
+val byAgeNullFirst = users.sortedWith(
+    compareBy(nullsFirst<Int>()) { it.age }
+)
+
+// Reverse any comparator
+val byAgeDesc = compareBy(nullsLast<Int>()) { it.age }.reversed()`;
+
+CODE['nulls-f'] = `data class Article(val title: String, val publishedAt: Instant?, val views: Int)
+
+val articles = listOf<Article>(/* ... */)
+
+// nullsLast on a date field — draft articles (null date) go to end
+val byDate = articles.sortedWith(
+    compareBy(nullsLast<Instant>()) { it.publishedAt }
+)
+
+// Multi-field with nullable primary key
+val byDateThenViews = articles.sortedWith(
+    compareBy(nullsFirst<Instant>()) { it.publishedAt }
+        .thenByDescending { it.views }
+)
+
+// sortedByDescending shorthand (no nulls)
+val mostViewed = articles.sortedByDescending { it.views }
+
+// Descending with reversed()
+val latestFirst = articles.sortedWith(
+    compareBy(nullsLast<Instant>()) { it.publishedAt }.reversed()
+)
+
+// Elvis in key — treat null as a sentinel value
+val withFallback = articles.sortedBy { it.publishedAt?.epochSecond ?: Long.MAX_VALUE }`;
+
+CODE['custom-q'] = `enum class Status { ACTIVE, PENDING, ARCHIVED }
+
+data class Item(val name: String, val status: Status, val score: Int)
+
+// Custom priority order that doesn't match enum ordinal
+val statusPriority = mapOf(
+    Status.ACTIVE   to 0,
+    Status.PENDING  to 1,
+    Status.ARCHIVED to 2,
+)
+
+val items = listOf<Item>(/* ... */)
+
+val sorted = items.sortedWith(
+    compareBy { statusPriority[it.status] }
+)`;
+
+CODE['custom-f'] = `// Locale-aware string comparator (correct for non-ASCII names)
+val locale = Locale.getDefault()
+val collator = Collator.getInstance(locale).apply { strength = Collator.PRIMARY }
+
+val byLocaleName = Comparator<User> { a, b -> collator.compare(a.name, b.name) }
+val sortedNames = users.sortedWith(byLocaleName)
+
+// Version string comparator ("1.10.0" > "1.9.0")
+val versionComparator = Comparator<String> { a, b ->
+    val partsA = a.split(".").map { it.toInt() }
+    val partsB = b.split(".").map { it.toInt() }
+    val maxLen = maxOf(partsA.size, partsB.size)
+    for (i in 0 until maxLen) {
+        val diff = (partsA.getOrElse(i) { 0 }) - (partsB.getOrElse(i) { 0 })
+        if (diff != 0) return@Comparator diff
+    }
+    0
+}
+val versions = listOf("1.9.0", "1.10.0", "2.0.0", "1.9.1")
+val sortedVersions = versions.sortedWith(versionComparator)
+// Result: [1.9.0, 1.9.1, 1.10.0, 2.0.0]
+
+// "Pinned items first" comparator combining domain rules
+val listComparator = Comparator<ListItem> { a, b ->
+    when {
+        a.isPinned && !b.isPinned -> -1    // a comes first
+        !a.isPinned && b.isPinned ->  1    // b comes first
+        else -> a.title.compareTo(b.title) // both same — alphabetical
+    }
+}`;
+
+CODE['inplace-q'] = `val mutable = mutableListOf("banana", "apple", "cherry")
+
+// In-place — mutates the list, returns Unit
+mutable.sort()                                  // natural order
+mutable.sortDescending()                        // natural descending
+mutable.sortBy { it.length }                   // by key
+mutable.sortByDescending { it.length }         // by key desc
+mutable.sortWith(compareBy { it.lowercase() }) // with comparator
+
+// vs immutable — always returns a NEW list
+val original = listOf("banana", "apple", "cherry")
+val sorted = original.sorted()   // original unchanged`;
+
+CODE['flowsort-q'] = `enum class SortOrder { NAME_ASC, NAME_DESC, PRICE_ASC, PRICE_DESC }
+
+class ProductViewModel(repo: ProductRepository) : ViewModel() {
+
+    private val _sortOrder = MutableStateFlow(SortOrder.NAME_ASC)
+    val sortOrder: StateFlow<SortOrder> = _sortOrder.asStateFlow()
+
+    val products: StateFlow<List<Product>> = combine(
+        repo.getProducts(),   // Flow<List<Product>> from Room/network
+        _sortOrder,
+    ) { products, order ->
+        products.sortedWith(order.toComparator())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun setSortOrder(order: SortOrder) { _sortOrder.value = order }
+}
+
+fun SortOrder.toComparator(): Comparator<Product> = when (this) {
+    SortOrder.NAME_ASC   -> compareBy { it.name }
+    SortOrder.NAME_DESC  -> compareByDescending { it.name }
+    SortOrder.PRICE_ASC  -> compareBy { it.price }
+    SortOrder.PRICE_DESC -> compareByDescending { it.price }
+}`;
+
+CODE['flowsort-f'] = `// Multi-field sort order with secondary key
+enum class SortField { NAME, PRICE, RATING, STOCK }
+data class SortConfig(val field: SortField, val descending: Boolean = false)
+
+class ProductViewModel(repo: ProductRepository) : ViewModel() {
+
+    private val _sortConfig = MutableStateFlow(SortConfig(SortField.NAME))
+    val sortConfig = _sortConfig.asStateFlow()
+
+    val products: StateFlow<List<Product>> = combine(
+        repo.getProducts(),
+        _sortConfig,
+    ) { list, config ->
+        val base: Comparator<Product> = when (config.field) {
+            SortField.NAME   -> compareBy { it.name }
+            SortField.PRICE  -> compareBy { it.price }
+            SortField.RATING -> compareBy { it.rating }
+            SortField.STOCK  -> compareBy { it.stock }
+        }
+        val ordered = if (config.descending) base.reversed() else base
+        list.sortedWith(ordered.thenBy { it.name })  // always alpha tiebreaker
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun sort(field: SortField) {
+        _sortConfig.update { current ->
+            if (current.field == field)
+                current.copy(descending = !current.descending)  // toggle direction
+            else
+                SortConfig(field)
+        }
+    }
+}
+
+// Compose UI — sort chip row
+@Composable
+fun SortBar(config: SortConfig, onSort: (SortField) -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        SortField.entries.forEach { field ->
+            val selected = config.field == field
+            FilterChip(
+                selected = selected,
+                onClick  = { onSort(field) },
+                label    = { Text(field.name) },
+                trailingIcon = if (selected) {
+                    {
+                        Icon(
+                            if (config.descending) Icons.Default.KeyboardArrowDown
+                            else Icons.Default.KeyboardArrowUp,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                } else null
+            )
+        }
+    }
+}`;
+
+initCode(CODE);
+</script>
+</body>
+</html>

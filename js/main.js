@@ -15,6 +15,7 @@ const NAV_PAGES = [
   { id: 'services',    label: 'Services',       href: 'services.html' },
   { id: 'storage',     label: 'Storage',        href: 'storage.html' },
   { id: 'testing',     label: 'Testing',        href: 'testing.html' },
+  { id: 'sorting',     label: 'Sorting',        href: 'sorting.html' },
   { id: 'paging',      label: 'Paging 3',       href: 'paging.html' },
   { id: 'gradle',      label: 'Gradle DSL',     href: 'gradle.html' },
   { id: 'patterns',    label: 'Design Patterns', href: 'patterns.html' },
