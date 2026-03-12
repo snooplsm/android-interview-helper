@@ -14,6 +14,9 @@
 <div class="layout">
   <aside class="sidebar">
     <div class="sidebar-heading">Storage</div>
+    <a href="#room">Room</a>
+    <a href="#room-dao">DAO &amp; Queries</a>
+    <a href="#room-relations">Relations &amp; Migration</a>
     <a href="#serialization">Kotlinx Serialization</a>
     <a href="#datastore">DataStore Preferences</a>
     <a href="#proto-datastore">Proto DataStore</a>
@@ -24,7 +27,94 @@
   <main class="content">
     <div class="page-hero">
       <h1>Storage</h1>
-      <p>Serialization, DataStore, SharedPreferences — modern and legacy approaches.</p>
+      <p>Room database, serialization, DataStore, SharedPreferences — modern and legacy approaches.</p>
+    </div>
+
+    <!-- ROOM -->
+    <div class="subsection" id="room">
+      <div class="sub-header">
+        <h2>Room — Entity &amp; Database</h2>
+        <a class="doc-link" href="https://developer.android.com/training/data-storage/room" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Room is the recommended SQLite abstraction. Define <code>@Entity</code> data classes, <code>@Dao</code> interfaces, and a <code>@Database</code> class. Room generates all the boilerplate at compile time.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-room-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-room-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>@PrimaryKey(autoGenerate = true):</strong> Room auto-increments the ID. Set <code>id = 0</code> when inserting a new row.</p>
+            <p><strong>@ColumnInfo(name = "..."):</strong> Override the SQLite column name (defaults to the field name).</p>
+            <p><strong>@Ignore:</strong> Exclude a field from the database schema.</p>
+            <p><strong>@Embedded:</strong> Flatten a nested data class into the parent table's columns.</p>
+            <p><strong>@TypeConverters:</strong> Teach Room how to store types it doesn't know (e.g. <code>Date</code>, <code>List&lt;String&gt;</code>, enums) by providing a class with <code>@TypeConverter</code> functions.</p>
+            <p><strong>Thread safety:</strong> Room enforces that database operations run off the main thread. With coroutines, use <code>suspend</code> functions in DAOs — Room switches to a background dispatcher automatically.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- ROOM DAO -->
+    <div class="subsection" id="room-dao">
+      <div class="sub-header">
+        <h2>DAO &amp; Queries</h2>
+        <a class="doc-link" href="https://developer.android.com/training/data-storage/room/accessing-data" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">DAOs use annotations to generate SQL. Return <code>Flow</code> from queries for live updates. Use <code>suspend</code> for one-shot writes.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-dao-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-dao-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>Flow vs suspend:</strong> Return <code>Flow&lt;T&gt;</code> from read queries to get a live stream that re-emits whenever the table changes. Use <code>suspend</code> for inserts/updates/deletes.</p>
+            <p><strong>@Insert onConflict:</strong> <code>OnConflictStrategy.REPLACE</code> deletes the old row and inserts the new one. <code>IGNORE</code> skips the insert silently. <code>ABORT</code> (default) throws an exception.</p>
+            <p><strong>@Query with LIKE:</strong> Pass <code>"%\${query}%"</code> for substring search — Room binds it safely, preventing SQL injection.</p>
+            <p><strong>@Transaction:</strong> Annotate a DAO function with <code>@Transaction</code> to run multiple operations atomically. Also required on queries that return <code>@Relation</code> data.</p>
+            <p><strong>Upsert (Room 2.5+):</strong> <code>@Upsert</code> inserts or updates in one step — no need for a manual REPLACE strategy.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- ROOM RELATIONS & MIGRATION -->
+    <div class="subsection" id="room-relations">
+      <div class="sub-header">
+        <h2>Relations &amp; Migration</h2>
+        <a class="doc-link" href="https://developer.android.com/training/data-storage/room/relationships" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Model one-to-many and many-to-many relationships with <code>@Relation</code>. Use <code>Migration</code> objects to evolve the schema without losing user data.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-rel-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-rel-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
     </div>
 
     <!-- SERIALIZATION -->
@@ -341,6 +431,205 @@ val vm = viewModel<SettingsViewModel>(
     factory = SettingsViewModelFactory(container.settingsRepository)
 )`
 };
+
+// ---- Room ----
+CODE['room-q'] = `// Entity
+@Entity(tableName = "users")
+data class UserEntity(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @ColumnInfo(name = "full_name") val name: String,
+    val email: String,
+    val createdAt: Long = System.currentTimeMillis(),
+)
+
+// Database
+@Database(entities = [UserEntity::class], version = 1, exportSchema = true)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun userDao(): UserDao
+}
+
+// Init (singleton)
+val db = Room.databaseBuilder(context, AppDatabase::class.java, "app.db").build()`;
+
+CODE['room-f'] = `// Entity with TypeConverter and Embedded
+@Entity(tableName = "posts")
+data class PostEntity(
+    @PrimaryKey val id: String,
+    val title: String,
+    val body: String,
+    val authorId: Int,
+    @ColumnInfo(name = "tag_list") val tags: List<String>,  // needs TypeConverter
+    val publishedAt: Date,                                   // needs TypeConverter
+)
+
+// TypeConverters class
+class Converters {
+    @TypeConverter fun fromTagList(tags: List<String>): String = tags.joinToString(",")
+    @TypeConverter fun toTagList(value: String): List<String> = value.split(",")
+
+    @TypeConverter fun fromDate(date: Date): Long = date.time
+    @TypeConverter fun toDate(ms: Long): Date = Date(ms)
+}
+
+// Database with TypeConverters + multiple entities
+@Database(
+    entities  = [UserEntity::class, PostEntity::class],
+    version   = 2,
+    exportSchema = true,
+)
+@TypeConverters(Converters::class)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun userDao(): UserDao
+    abstract fun postDao(): PostDao
+
+    companion object {
+        @Volatile private var INSTANCE: AppDatabase? = null
+
+        fun getInstance(context: Context): AppDatabase =
+            INSTANCE ?: synchronized(this) {
+                Room.databaseBuilder(context, AppDatabase::class.java, "app.db")
+                    .addMigrations(MIGRATION_1_2)
+                    .fallbackToDestructiveMigration()   // dev only
+                    .build()
+                    .also { INSTANCE = it }
+            }
+    }
+}`;
+
+CODE['dao-q'] = `@Dao
+interface UserDao {
+
+    @Query("SELECT * FROM users ORDER BY full_name ASC")
+    fun getAllUsers(): Flow<List<UserEntity>>      // live updates
+
+    @Query("SELECT * FROM users WHERE id = :id")
+    suspend fun getUserById(id: Int): UserEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(user: UserEntity): Long     // returns new row id
+
+    @Update
+    suspend fun update(user: UserEntity)
+
+    @Delete
+    suspend fun delete(user: UserEntity)
+
+    @Query("DELETE FROM users")
+    suspend fun deleteAll()
+}`;
+
+CODE['dao-f'] = `@Dao
+interface UserDao {
+
+    // Live query — re-emits whenever the users table changes
+    @Query("SELECT * FROM users ORDER BY full_name ASC")
+    fun getAllUsers(): Flow<List<UserEntity>>
+
+    // Filtered query with LIKE for search
+    @Query("SELECT * FROM users WHERE full_name LIKE :query OR email LIKE :query")
+    fun searchUsers(query: String): Flow<List<UserEntity>>
+
+    // Paging 3 integration — Room auto-generates the PagingSource
+    @Query("SELECT * FROM users ORDER BY full_name ASC")
+    fun getAllUsersPaged(): PagingSource<Int, UserEntity>
+
+    @Query("SELECT * FROM users WHERE id = :id")
+    suspend fun getUserById(id: Int): UserEntity?
+
+    // Bulk insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(users: List<UserEntity>)
+
+    // Upsert (Room 2.5+)
+    @Upsert
+    suspend fun upsert(user: UserEntity)
+
+    @Update
+    suspend fun update(user: UserEntity)
+
+    @Delete
+    suspend fun delete(user: UserEntity)
+
+    @Query("DELETE FROM users WHERE id = :id")
+    suspend fun deleteById(id: Int)
+
+    @Query("DELETE FROM users")
+    suspend fun clearAll()
+
+    // Atomic multi-step operation
+    @Transaction
+    suspend fun replaceAll(users: List<UserEntity>) {
+        clearAll()
+        insertAll(users)
+    }
+
+    // Raw query (dynamic SQL — avoid unless necessary)
+    @RawQuery(observedEntities = [UserEntity::class])
+    fun rawQuery(query: SupportSQLiteQuery): Flow<List<UserEntity>>
+}`;
+
+CODE['rel-q'] = `// One-to-many: User has many Posts
+data class UserWithPosts(
+    @Embedded val user: UserEntity,
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "authorId"
+    )
+    val posts: List<PostEntity>
+)
+
+// DAO — @Transaction required for @Relation queries
+@Dao
+interface UserDao {
+    @Transaction
+    @Query("SELECT * FROM users WHERE id = :userId")
+    fun getUserWithPosts(userId: Int): Flow<UserWithPosts>
+}`;
+
+CODE['rel-f'] = `// Many-to-many: Users <-> Groups via cross-ref table
+@Entity(primaryKeys = ["userId", "groupId"])
+data class UserGroupCrossRef(val userId: Int, val groupId: Int)
+
+data class UserWithGroups(
+    @Embedded val user: UserEntity,
+    @Relation(
+        parentColumn   = "id",
+        entityColumn   = "id",
+        associateBy    = Junction(UserGroupCrossRef::class,
+            parentColumn = "userId",
+            entityColumn = "groupId")
+    )
+    val groups: List<GroupEntity>
+)
+
+@Transaction
+@Query("SELECT * FROM users WHERE id = :userId")
+fun getUserWithGroups(userId: Int): Flow<UserWithGroups>
+
+// ── Schema Migration ─────────────────────────────────────────
+val MIGRATION_1_2 = object : Migration(1, 2) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // Add a new column (nullable so existing rows get null)
+        db.execSQL("ALTER TABLE users ADD COLUMN bio TEXT")
+    }
+}
+
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // Create a new table
+        db.execSQL("""
+            CREATE TABLE IF NOT EXISTS groups (
+                id   INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                name TEXT    NOT NULL
+            )
+        """.trimIndent())
+    }
+}
+
+// Register migrations when building the database
+Room.databaseBuilder(context, AppDatabase::class.java, "app.db")
+    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+    .build()`;
 
 initCode(CODE);
 </script>
