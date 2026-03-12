@@ -14,6 +14,7 @@ const NAV_PAGES = [
   { id: 'manifests',   label: 'Manifests',      href: 'manifests.html' },
   { id: 'services',    label: 'Services',       href: 'services.html' },
   { id: 'storage',     label: 'Storage',        href: 'storage.html' },
+  { id: 'paging',      label: 'Paging 3',       href: 'paging.html' },
   { id: 'gradle',      label: 'Gradle DSL',     href: 'gradle.html' },
   { id: 'patterns',    label: 'Design Patterns', href: 'patterns.html' },
 ];

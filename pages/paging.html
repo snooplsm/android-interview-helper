@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paging 3 – Android Compose Guide</title>
+  <script>(function(){ document.documentElement.dataset.theme = localStorage.getItem('guide-theme') || 'light'; })();</script>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+</head>
+<body data-page="paging">
+<div id="nav-container"></div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-heading">Paging 3</div>
+    <a href="#setup">Setup</a>
+    <a href="#paging-source">PagingSource</a>
+    <a href="#pager-vm">Pager &amp; ViewModel</a>
+    <a href="#compose-ui">Compose UI</a>
+    <a href="#load-states">Load States</a>
+    <a href="#remote-mediator">RemoteMediator</a>
+    <a href="#paging-di">With / Without Hilt</a>
+  </aside>
+
+  <main class="content">
+    <div class="page-hero">
+      <h1>Paging 3</h1>
+      <p>Load large datasets in chunks from network or database. Integrates natively with Compose via <code>collectAsLazyPagingItems()</code>.</p>
+    </div>
+
+    <!-- SETUP -->
+    <div class="subsection" id="setup">
+      <div class="sub-header">
+        <h2>Setup</h2>
+        <a class="doc-link" href="https://developer.android.com/topic/libraries/architecture/paging/v3-overview" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Add the runtime and Compose extension to your version catalog and module gradle file.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">TOML / Gradle</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-setup-q" class="language-kotlin"></code></pre>
+      </div>
+    </div>
+
+    <!-- PAGING SOURCE -->
+    <div class="subsection" id="paging-source">
+      <div class="sub-header">
+        <h2>PagingSource</h2>
+        <a class="doc-link" href="https://developer.android.com/topic/libraries/architecture/paging/v3-paged-data" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Implement <code>PagingSource&lt;Key, Value&gt;</code> to define how to load a page. <code>Key</code> is typically <code>Int</code> (page number) or <code>String</code> (cursor). Override <code>load()</code> and <code>getRefreshKey()</code>.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-source-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-source-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>LoadResult.Page parameters:</strong></p>
+            <ul>
+              <li><code>data</code> — the list of items for this page</li>
+              <li><code>prevKey</code> — key for the page before this one (<code>null</code> if first page)</li>
+              <li><code>nextKey</code> — key for the page after this one (<code>null</code> if last page)</li>
+            </ul>
+            <p><strong>getRefreshKey():</strong> Called when the list is refreshed (e.g. pull-to-refresh). Return the key closest to <code>state.anchorPosition</code> so the user lands on roughly the same item.</p>
+            <p><strong>Room integration:</strong> Room generates a <code>PagingSource</code> automatically when you return <code>PagingSource&lt;Int, Entity&gt;</code> from a <code>@Query</code> DAO method — no manual implementation needed.</p>
+            <p><strong>invalidate():</strong> Call <code>pagingSource.invalidate()</code> to trigger a full refresh (e.g. after a write operation).</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- PAGER & VIEWMODEL -->
+    <div class="subsection" id="pager-vm">
+      <div class="sub-header">
+        <h2>Pager &amp; ViewModel</h2>
+        <a class="doc-link" href="https://developer.android.com/topic/libraries/architecture/paging/v3-paged-data#pagingdata-stream" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Create a <code>Pager</code> in the ViewModel and expose it as a <code>Flow&lt;PagingData&lt;T&gt;&gt;</code>. Always call <code>.cachedIn(viewModelScope)</code> to survive recomposition and config changes.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-pager-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-pager-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>PagingConfig parameters:</strong></p>
+            <ul>
+              <li><code>pageSize</code> — items loaded per page. Target 1–3× the visible screen count.</li>
+              <li><code>prefetchDistance</code> — how many items before the end triggers the next load. Defaults to <code>pageSize</code>.</li>
+              <li><code>initialLoadSize</code> — size of the first load (defaults to <code>pageSize × 3</code>).</li>
+              <li><code>enablePlaceholders</code> — show placeholder items for unloaded positions (requires knowing total count).</li>
+              <li><code>maxSize</code> — drop pages from the opposite end when the list grows past this. Defaults to unlimited.</li>
+            </ul>
+            <p><strong>cachedIn(viewModelScope):</strong> Without this, every new collector (recomposition, nav back) triggers a fresh network load. <code>cachedIn</code> keeps the most recent <code>PagingData</code> alive in the scope and replays it to new collectors.</p>
+            <p><strong>Multiple Pagers:</strong> Each <code>Pager</code> instance manages its own page cache. Create a new one when the query changes — don't reuse the same <code>Pager</code> with different params.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- COMPOSE UI -->
+    <div class="subsection" id="compose-ui">
+      <div class="sub-header">
+        <h2>Compose UI</h2>
+        <a class="doc-link" href="https://developer.android.com/topic/libraries/architecture/paging/v3-present-ui#compose" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Call <code>collectAsLazyPagingItems()</code> on the flow. Use <code>items(lazyItems)</code> in a <code>LazyColumn</code> — Paging handles prefetch automatically.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-ui-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-ui-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOAD STATES -->
+    <div class="subsection" id="load-states">
+      <div class="sub-header">
+        <h2>Load States</h2>
+        <a class="doc-link" href="https://developer.android.com/topic/libraries/architecture/paging/v3-present-ui#display-loading-state" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc"><code>LazyPagingItems.loadState</code> exposes three independent states: <code>refresh</code> (initial/pull-to-refresh), <code>prepend</code> (loading above), and <code>append</code> (loading below).</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-states-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-states-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>Three LoadState slots:</strong></p>
+            <ul>
+              <li><code>loadState.refresh</code> — triggered by <code>PagingData</code> invalidation or <code>lazyItems.refresh()</code>. Show a full-screen spinner here.</li>
+              <li><code>loadState.append</code> — triggered when the user scrolls near the end. Show a footer spinner.</li>
+              <li><code>loadState.prepend</code> — triggered when scrolling near the top (less common). Show a header spinner.</li>
+            </ul>
+            <p><strong>LoadState types:</strong> <code>LoadState.Loading</code>, <code>LoadState.NotLoading(endOfPaginationReached: Boolean)</code>, <code>LoadState.Error(error: Throwable)</code>.</p>
+            <p><strong>Retry:</strong> Call <code>lazyItems.retry()</code> on error. Call <code>lazyItems.refresh()</code> to reload from scratch (e.g. pull-to-refresh).</p>
+            <p><strong>Interview tip:</strong> Distinguish <code>refresh</code> vs <code>append</code> — interviewers often ask which state to observe for a loading spinner vs a footer indicator.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- REMOTE MEDIATOR -->
+    <div class="subsection" id="remote-mediator">
+      <div class="sub-header">
+        <h2>RemoteMediator</h2>
+        <a class="doc-link" href="https://developer.android.com/topic/libraries/architecture/paging/v3-network-db" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Combines network + local database. Room serves the UI; the mediator fetches from network and writes to Room. Use when you need offline support or a single source of truth.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-mediator-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-mediator-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>MediatorResult:</strong></p>
+            <ul>
+              <li><code>MediatorResult.Success(endOfPaginationReached = false)</code> — loaded OK, more pages exist</li>
+              <li><code>MediatorResult.Success(endOfPaginationReached = true)</code> — no more pages</li>
+              <li><code>MediatorResult.Error(throwable)</code> — propagates to <code>loadState.append/refresh.error</code></li>
+            </ul>
+            <p><strong>LoadType:</strong> <code>REFRESH</code> clears the DB and reloads from scratch. <code>APPEND</code> loads the next page. <code>PREPEND</code> loads the previous page (rare).</p>
+            <p><strong>RemoteKeys table:</strong> A common pattern stores the next/prev page cursor for each item in a separate <code>RemoteKeys</code> Room table so the mediator knows where to resume after process death.</p>
+            <p><strong>Flow direction:</strong> Network → Room → PagingSource → UI. The UI never calls the network directly; Room invalidates the PagingSource automatically after each insert.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- WITH / WITHOUT HILT -->
+    <div class="subsection" id="paging-di">
+      <div class="sub-header">
+        <h2>With / Without Hilt</h2>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin — With Hilt</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-hilt-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-hilt-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+      <div class="code-card" style="margin-top:12px">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin — Without Hilt</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-nohilt-q" class="language-kotlin"></code></pre>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const CODE = {};
+
+CODE['setup-q'] = `# libs.versions.toml
+[versions]
+paging = "3.3.6"
+
+[libraries]
+paging-runtime  = { module = "androidx.paging:paging-runtime",  version.ref = "paging" }
+paging-compose  = { module = "androidx.paging:paging-compose",  version.ref = "paging" }
+
+# build.gradle.kts (app module)
+implementation(libs.paging.runtime)
+implementation(libs.paging.compose)`;
+
+CODE['source-q'] = `class UserPagingSource(
+    private val api: UserApi,
+    private val query: String,
+) : PagingSource<Int, User>() {
+
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, User> {
+        val page = params.key ?: 1          // start at page 1 if no key
+        return try {
+            val response = api.searchUsers(query = query, page = page, size = params.loadSize)
+            LoadResult.Page(
+                data     = response.users,
+                prevKey  = if (page == 1) null else page - 1,
+                nextKey  = if (response.users.isEmpty()) null else page + 1
+            )
+        } catch (e: Exception) {
+            LoadResult.Error(e)
+        }
+    }
+
+    override fun getRefreshKey(state: PagingState<Int, User>): Int? {
+        // Resume closest to the anchor after invalidation
+        return state.anchorPosition?.let { anchor ->
+            state.closestPageToPosition(anchor)?.prevKey?.plus(1)
+                ?: state.closestPageToPosition(anchor)?.nextKey?.minus(1)
+        }
+    }
+}`;
+
+CODE['source-f'] = `// Room auto-generates PagingSource — no manual implementation needed
+@Dao
+interface UserDao {
+    @Query("SELECT * FROM users WHERE name LIKE :query ORDER BY name ASC")
+    fun searchUsersPaged(query: String): PagingSource<Int, UserEntity>
+}
+
+// Cursor-based PagingSource (e.g. GitHub API uses cursor strings)
+class CursorPagingSource(private val api: GitHubApi) : PagingSource<String, Repo>() {
+
+    override suspend fun load(params: LoadParams<String>): LoadResult<String, Repo> {
+        return try {
+            val response = api.getRepos(after = params.key, first = params.loadSize)
+            LoadResult.Page(
+                data    = response.repos,
+                prevKey = null,                // cursor pagination is append-only
+                nextKey = if (response.hasNextPage) response.endCursor else null
+            )
+        } catch (e: Exception) {
+            LoadResult.Error(e)
+        }
+    }
+
+    override fun getRefreshKey(state: PagingState<String, Repo>): String? = null
+}`;
+
+CODE['pager-q'] = `class UserViewModel(private val repository: UserRepository) : ViewModel() {
+
+    val users: Flow<PagingData<User>> = Pager(
+        config = PagingConfig(
+            pageSize         = 20,
+            prefetchDistance = 5,
+            enablePlaceholders = false,
+        ),
+        pagingSourceFactory = { repository.getUserPagingSource() }
+    )
+    .flow
+    .cachedIn(viewModelScope)   // survive recomposition + config changes
+}`;
+
+CODE['pager-f'] = `// Reactive query — new Pager when search query changes
+class SearchViewModel(private val api: UserApi) : ViewModel() {
+
+    private val queryFlow = MutableStateFlow("")
+
+    val results: Flow<PagingData<User>> = queryFlow
+        .debounce(300)
+        .distinctUntilChanged()
+        .flatMapLatest { query ->
+            Pager(
+                config = PagingConfig(pageSize = 20, prefetchDistance = 5),
+                pagingSourceFactory = { UserPagingSource(api, query) }
+            ).flow
+        }
+        .cachedIn(viewModelScope)
+
+    fun onQueryChange(q: String) { queryFlow.value = q }
+}
+
+// Repository — returns a new PagingSource each time Pager needs one
+class UserRepository(private val api: UserApi, private val dao: UserDao) {
+    fun getUserPagingSource(query: String = "") =
+        if (query.isBlank()) dao.getAllUsersPaged()
+        else dao.searchUsersPaged("%\${query}%")
+}`;
+
+CODE['ui-q'] = `@Composable
+fun UserListScreen(viewModel: UserViewModel = hiltViewModel()) {
+    val lazyItems = viewModel.users.collectAsLazyPagingItems()
+
+    LazyColumn {
+        items(
+            count = lazyItems.itemCount,
+            key   = lazyItems.itemKey { it.id },
+        ) { index ->
+            val user = lazyItems[index]   // triggers load of surrounding pages
+            if (user != null) UserRow(user) else UserRowPlaceholder()
+        }
+    }
+}`;
+
+CODE['ui-f'] = `@Composable
+fun UserListScreen(viewModel: UserViewModel = hiltViewModel()) {
+    val lazyItems = viewModel.users.collectAsLazyPagingItems()
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+
+            // Content items
+            items(
+                count       = lazyItems.itemCount,
+                key         = lazyItems.itemKey { it.id },
+                contentType = lazyItems.itemContentType { "user" },
+            ) { index ->
+                val user = lazyItems[index]
+                if (user != null) UserRow(user) else ShimmerRow()
+            }
+
+            // Append loading footer
+            item {
+                if (lazyItems.loadState.append is LoadState.Loading) {
+                    Box(Modifier.fillMaxWidth().padding(16.dp), Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
+
+            // Append error footer with retry
+            item {
+                val appendError = lazyItems.loadState.append as? LoadState.Error
+                if (appendError != null) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text("Load failed")
+                        Spacer(Modifier.width(8.dp))
+                        TextButton(onClick = { lazyItems.retry() }) { Text("Retry") }
+                    }
+                }
+            }
+        }
+
+        // Full-screen refresh spinner
+        if (lazyItems.loadState.refresh is LoadState.Loading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
+    }
+}`;
+
+CODE['states-q'] = `val lazyItems = viewModel.users.collectAsLazyPagingItems()
+
+when (val refresh = lazyItems.loadState.refresh) {
+    is LoadState.Loading      -> FullScreenSpinner()
+    is LoadState.Error        -> ErrorScreen(refresh.error) { lazyItems.refresh() }
+    is LoadState.NotLoading   -> { /* data ready */ }
+}
+
+// Append state — show footer spinner at bottom of list
+if (lazyItems.loadState.append is LoadState.Loading) {
+    FooterSpinner()
+}`;
+
+CODE['states-f'] = `// Centralised load state handler composable
+@Composable
+fun PagingStateHandler(
+    lazyItems: LazyPagingItems<*>,
+    content: @Composable () -> Unit,
+) {
+    val refresh = lazyItems.loadState.refresh
+    val append  = lazyItems.loadState.append
+
+    Box(Modifier.fillMaxSize()) {
+        // Show list content once refresh is not loading
+        if (refresh !is LoadState.Loading) content()
+
+        // Full-screen spinner on initial load
+        if (refresh is LoadState.Loading) {
+            CircularProgressIndicator(Modifier.align(Alignment.Center))
+        }
+
+        // Full-screen error on refresh failure
+        if (refresh is LoadState.Error) {
+            Column(
+                modifier = Modifier.align(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("Something went wrong")
+                Spacer(Modifier.height(8.dp))
+                Button(onClick = { lazyItems.refresh() }) { Text("Retry") }
+            }
+        }
+    }
+}
+
+// Pull-to-refresh integration
+val pullState = rememberPullToRefreshState()
+PullToRefreshBox(
+    isRefreshing = lazyItems.loadState.refresh is LoadState.Loading,
+    onRefresh    = { lazyItems.refresh() },
+    state        = pullState,
+) {
+    LazyColumn { /* items */ }
+}`;
+
+CODE['mediator-q'] = `@OptIn(ExperimentalPagingApi::class)
+class UserRemoteMediator(
+    private val api: UserApi,
+    private val db:  AppDatabase,
+) : RemoteMediator<Int, UserEntity>() {
+
+    override suspend fun load(
+        loadType: LoadType,
+        state: PagingState<Int, UserEntity>,
+    ): MediatorResult {
+        val page = when (loadType) {
+            LoadType.REFRESH  -> 1
+            LoadType.PREPEND  -> return MediatorResult.Success(endOfPaginationReached = true)
+            LoadType.APPEND   -> {
+                val lastItem = state.lastItemOrNull()
+                    ?: return MediatorResult.Success(endOfPaginationReached = true)
+                (lastItem.id / state.config.pageSize) + 1
+            }
+        }
+        return try {
+            val response = api.getUsers(page = page, size = state.config.pageSize)
+            db.withTransaction {
+                if (loadType == LoadType.REFRESH) db.userDao().clearAll()
+                db.userDao().insertAll(response.map { it.toEntity() })
+            }
+            MediatorResult.Success(endOfPaginationReached = response.isEmpty())
+        } catch (e: Exception) {
+            MediatorResult.Error(e)
+        }
+    }
+}`;
+
+CODE['mediator-f'] = `// RemoteKeys table — tracks next/prev cursor per item
+@Entity
+data class RemoteKey(
+    @PrimaryKey val userId: Int,
+    val prevPage: Int?,
+    val nextPage: Int?,
+)
+
+@Dao
+interface RemoteKeyDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(keys: List<RemoteKey>)
+    @Query("SELECT * FROM RemoteKey WHERE userId = :id")
+    suspend fun remoteKeyById(id: Int): RemoteKey?
+    @Query("DELETE FROM RemoteKey")
+    suspend fun clearAll()
+}
+
+// Mediator with RemoteKeys for reliable cursor tracking
+@OptIn(ExperimentalPagingApi::class)
+class UserRemoteMediator(
+    private val api: UserApi,
+    private val db:  AppDatabase,
+) : RemoteMediator<Int, UserEntity>() {
+
+    override suspend fun initialize() = InitializeAction.LAUNCH_INITIAL_REFRESH
+
+    override suspend fun load(
+        loadType: LoadType,
+        state: PagingState<Int, UserEntity>,
+    ): MediatorResult {
+        val page = when (loadType) {
+            LoadType.REFRESH -> {
+                val anchor = state.anchorPosition?.let { pos ->
+                    state.closestItemToPosition(pos)?.id?.let { id ->
+                        db.remoteKeyDao().remoteKeyById(id)
+                    }
+                }
+                anchor?.nextPage?.minus(1) ?: 1
+            }
+            LoadType.PREPEND -> {
+                val first = state.pages.firstOrNull()?.data?.firstOrNull()
+                    ?: return MediatorResult.Success(endOfPaginationReached = true)
+                db.remoteKeyDao().remoteKeyById(first.id)?.prevPage
+                    ?: return MediatorResult.Success(endOfPaginationReached = true)
+            }
+            LoadType.APPEND -> {
+                val last = state.pages.lastOrNull()?.data?.lastOrNull()
+                    ?: return MediatorResult.Success(endOfPaginationReached = true)
+                db.remoteKeyDao().remoteKeyById(last.id)?.nextPage
+                    ?: return MediatorResult.Success(endOfPaginationReached = true)
+            }
+        }
+        return try {
+            val users = api.getUsers(page = page, size = state.config.pageSize)
+            val endOfPagination = users.isEmpty()
+            db.withTransaction {
+                if (loadType == LoadType.REFRESH) {
+                    db.userDao().clearAll()
+                    db.remoteKeyDao().clearAll()
+                }
+                val keys = users.map {
+                    RemoteKey(
+                        userId   = it.id,
+                        prevPage = if (page == 1) null else page - 1,
+                        nextPage = if (endOfPagination) null else page + 1,
+                    )
+                }
+                db.remoteKeyDao().insertAll(keys)
+                db.userDao().insertAll(users.map { it.toEntity() })
+            }
+            MediatorResult.Success(endOfPaginationReached = endOfPagination)
+        } catch (e: Exception) {
+            MediatorResult.Error(e)
+        }
+    }
+}
+
+// Pager with both PagingSource (Room) and RemoteMediator (network)
+@OptIn(ExperimentalPagingApi::class)
+fun buildPager(db: AppDatabase, api: UserApi) = Pager(
+    config         = PagingConfig(pageSize = 20),
+    remoteMediator = UserRemoteMediator(api, db),
+    pagingSourceFactory = { db.userDao().getAllPaged() }   // Room source of truth
+)`;
+
+CODE['hilt-q'] = `@Module
+@InstallIn(SingletonComponent::class)
+object PagingModule {
+
+    @Provides @Singleton
+    fun provideUserRepository(api: UserApi): UserRepository =
+        UserRepository(api)
+}
+
+@HiltViewModel
+class UserViewModel @Inject constructor(
+    private val repository: UserRepository,
+) : ViewModel() {
+
+    val users: Flow<PagingData<User>> = Pager(
+        config = PagingConfig(pageSize = 20),
+        pagingSourceFactory = { repository.getUserPagingSource() }
+    ).flow.cachedIn(viewModelScope)
+}
+
+// In Composable
+val vm: UserViewModel = hiltViewModel()`;
+
+CODE['hilt-f'] = `// Full Hilt setup with RemoteMediator
+@Module
+@InstallIn(SingletonComponent::class)
+object PagingModule {
+
+    @Provides @Singleton
+    fun provideAppDatabase(@ApplicationContext ctx: Context): AppDatabase =
+        Room.databaseBuilder(ctx, AppDatabase::class.java, "app.db").build()
+
+    @Provides @Singleton
+    fun provideUserApi(retrofit: Retrofit): UserApi =
+        retrofit.create(UserApi::class.java)
+
+    @Provides @Singleton
+    fun provideUserRepository(api: UserApi, db: AppDatabase): UserRepository =
+        UserRepository(api, db)
+}
+
+@HiltViewModel
+@OptIn(ExperimentalPagingApi::class)
+class UserViewModel @Inject constructor(
+    private val repository: UserRepository,
+) : ViewModel() {
+
+    val users = Pager(
+        config         = PagingConfig(pageSize = 20, prefetchDistance = 5),
+        remoteMediator = repository.remoteMediator(),
+        pagingSourceFactory = { repository.pagingSource() }
+    ).flow.cachedIn(viewModelScope)
+}`;
+
+CODE['nohilt-q'] = `// AppContainer — manual wiring
+class AppContainer(context: Context) {
+    private val retrofit = Retrofit.Builder()
+        .baseUrl("https://api.example.com/")
+        .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+        .build()
+
+    private val api = retrofit.create(UserApi::class.java)
+    private val db  = Room.databaseBuilder(context, AppDatabase::class.java, "app.db").build()
+
+    val userRepository = UserRepository(api, db)
+}
+
+class MyApp : Application() {
+    val container by lazy { AppContainer(this) }
+}
+
+// In Activity / NavHost
+val factory = viewModelFactory {
+    initializer {
+        val app = this[APPLICATION_KEY] as MyApp
+        UserViewModel(app.container.userRepository)
+    }
+}
+val vm: UserViewModel = viewModel(factory = factory)`;
+
+initCode(CODE);
+</script>
+</body>
+</html>
