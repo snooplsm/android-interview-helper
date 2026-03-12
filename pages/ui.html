@@ -720,6 +720,40 @@
         <div class="code-expanded">
           <pre><code id="code-cl-f" class="language-kotlin"></code></pre>
         </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>Vertical Guidelines</strong> — divide the layout on the horizontal axis (left/right positioning):</p>
+            <ul>
+              <li><code>createGuidelineFromStart(fraction)</code> — e.g. <code>0.3f</code> = 30% from the start edge</li>
+              <li><code>createGuidelineFromEnd(fraction)</code> — e.g. <code>0.2f</code> = 20% from the end edge</li>
+              <li><code>createGuidelineFromStart(offset)</code> — fixed dp offset from start, e.g. <code>80.dp</code></li>
+              <li><code>createGuidelineFromEnd(offset)</code> — fixed dp offset from end</li>
+            </ul>
+            <p>Constrain a composable's <code>start</code> or <code>end</code> to a vertical guideline:</p>
+            <pre style="background:#f8f8f8;padding:8px;border-radius:6px;font-size:.82rem;overflow-x:auto"><code>val guide = createGuidelineFromStart(0.4f)
+Text(modifier = Modifier.constrainAs(label) {
+    start.linkTo(guide, margin = 8.dp)
+    top.linkTo(parent.top)
+})</code></pre>
+            <p><strong>Horizontal Guidelines</strong> — divide the layout on the vertical axis (top/bottom positioning):</p>
+            <ul>
+              <li><code>createGuidelineFromTop(fraction)</code> — e.g. <code>0.5f</code> = 50% from top (vertical center)</li>
+              <li><code>createGuidelineFromBottom(fraction)</code> — e.g. <code>0.25f</code> = 25% from bottom</li>
+              <li><code>createGuidelineFromTop(offset)</code> — fixed dp from top, e.g. <code>64.dp</code></li>
+              <li><code>createGuidelineFromBottom(offset)</code> — fixed dp from bottom</li>
+            </ul>
+            <p>Constrain a composable's <code>top</code> or <code>bottom</code> to a horizontal guideline:</p>
+            <pre style="background:#f8f8f8;padding:8px;border-radius:6px;font-size:.82rem;overflow-x:auto"><code>val midLine = createGuidelineFromTop(0.5f)
+Image(modifier = Modifier.constrainAs(avatar) {
+    bottom.linkTo(midLine)          // avatar sits above center
+    centerHorizontallyTo(parent)
+})</code></pre>
+            <p><strong>Barriers</strong> — a dynamic guideline that tracks the outermost edge of a set of views: <code>createStartBarrier()</code>, <code>createEndBarrier()</code>, <code>createTopBarrier()</code>, <code>createBottomBarrier()</code>.</p>
+            <p><strong>Chains</strong> — distribute a group of views: <code>createHorizontalChain(a, b, c, chainStyle = ChainStyle.Spread)</code>. Styles: <code>Spread</code>, <code>SpreadInside</code>, <code>Packed</code>.</p>
+            <p><strong>Bias</strong> — position between two constraints: <code>horizontalBias = 0.3f</code> inside <code>constrainAs</code> pushes the view 30% from start rather than centered.</p>
+          </div>
+        </details>
       </div>
     </div>
 
@@ -1270,50 +1304,100 @@ Card(shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)) {
 Card(shape = MaterialTheme.shapes.medium) { /* … */ }   // ExtraSmall/Small/Medium/Large/ExtraLarge`,
 
 'cl-q': `ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-    val (title, button) = createRefs()
+    val (avatar, name, badge) = createRefs()
 
-    Text(
-        text = "Hello",
-        modifier = Modifier.constrainAs(title) {
-            top.linkTo(parent.top, margin = 16.dp)
-            start.linkTo(parent.start, margin = 16.dp)
-        }
-    )
-    Button(
-        onClick = {},
-        modifier = Modifier.constrainAs(button) {
-            top.linkTo(title.bottom, margin = 8.dp)
-            end.linkTo(parent.end, margin = 16.dp)
-        }
-    ) { Text("Click") }
-}`,
-'cl-f': `ConstraintLayout(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-    val (image, name, role, divider) = createRefs()
-    val guideline = createGuidelineFromStart(0.3f)  // 30% from start
+    // Vertical guideline — splits layout 35% from start (left/right anchor)
+    val vertGuide  = createGuidelineFromStart(0.35f)
+
+    // Horizontal guideline — sits 20% from top (top/bottom anchor)
+    val horizGuide = createGuidelineFromTop(0.2f)
 
     Image(
         painter = painterResource(R.drawable.avatar),
         contentDescription = null,
         modifier = Modifier
-            .size(64.dp)
+            .size(56.dp)
             .clip(CircleShape)
-            .constrainAs(image) {
-                top.linkTo(parent.top)
-                start.linkTo(parent.start)
+            .constrainAs(avatar) {
+                end.linkTo(vertGuide, margin = 8.dp)   // right side of avatar at vertical guide
+                top.linkTo(horizGuide)                  // top of avatar at horizontal guide
             }
     )
-    Text("Jane Doe", modifier = Modifier.constrainAs(name) {
-        top.linkTo(image.top)
-        start.linkTo(guideline, margin = 8.dp)
-    })
-    Text("Android Engineer", modifier = Modifier.constrainAs(role) {
-        top.linkTo(name.bottom, margin = 4.dp)
-        start.linkTo(guideline, margin = 8.dp)
-    })
-    // Barrier example
-    val barrier = createEndBarrier(name, role)
-    // Chain example
-    createHorizontalChain(name, role, chainStyle = ChainStyle.Packed)
+    Text(
+        text = "Jane Doe",
+        modifier = Modifier.constrainAs(name) {
+            start.linkTo(vertGuide, margin = 8.dp)     // left side of text at vertical guide
+            top.linkTo(horizGuide)
+        }
+    )
+    Text(
+        text = "Android Engineer",
+        modifier = Modifier.constrainAs(badge) {
+            start.linkTo(vertGuide, margin = 8.dp)
+            top.linkTo(name.bottom, margin = 4.dp)
+        }
+    )
+}`,
+'cl-f': `// All guideline variants — login screen example
+ConstraintLayout(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    val (logo, title, subtitle, action) = createRefs()
+
+    // ── Vertical guidelines (constrain start / end) ───────────────────
+    val startGuide = createGuidelineFromStart(0.1f)    // 10% from left
+    val endGuide   = createGuidelineFromEnd(0.1f)      // 10% from right
+    val startFixed = createGuidelineFromStart(80.dp)   // fixed 80dp from left
+    val endFixed   = createGuidelineFromEnd(80.dp)     // fixed 80dp from right
+
+    // ── Horizontal guidelines (constrain top / bottom) ────────────────
+    val topFixed   = createGuidelineFromTop(64.dp)     // fixed 64dp from top
+    val midLine    = createGuidelineFromTop(0.5f)      // 50% — exact center
+    val bottomFixed = createGuidelineFromBottom(72.dp) // fixed 72dp from bottom
+
+    // Logo — above center, horizontally centered between margin guides
+    Image(
+        painter = painterResource(R.drawable.logo),
+        contentDescription = "Logo",
+        modifier = Modifier.size(80.dp).constrainAs(logo) {
+            bottom.linkTo(midLine, margin = 24.dp)     // sits above the midline
+            start.linkTo(startGuide)
+            end.linkTo(endGuide)
+        }
+    )
+
+    // Title — just below center
+    Text(
+        text = "Welcome",
+        style = MaterialTheme.typography.headlineMedium,
+        modifier = Modifier.constrainAs(title) {
+            top.linkTo(midLine, margin = 16.dp)
+            start.linkTo(startGuide)
+            end.linkTo(endGuide)
+            width = Dimension.fillToConstraints
+        }
+    )
+
+    // Subtitle — below title
+    Text(
+        text = "Sign in to continue",
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = Modifier.constrainAs(subtitle) {
+            top.linkTo(title.bottom, margin = 8.dp)
+            start.linkTo(startGuide)
+            end.linkTo(endGuide)
+            width = Dimension.fillToConstraints
+        }
+    )
+
+    // CTA button — pinned above bottom guide
+    Button(
+        onClick = {},
+        modifier = Modifier.constrainAs(action) {
+            bottom.linkTo(bottomFixed)
+            start.linkTo(startGuide)
+            end.linkTo(endGuide)
+            width = Dimension.fillToConstraints
+        }
+    ) { Text("Get Started") }
 }`,
 
 'tf-q': `// Single-line TextField
