@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Testing – Android Compose Guide</title>
+  <script>(function(){ document.documentElement.dataset.theme = localStorage.getItem('guide-theme') || 'light'; })();</script>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+</head>
+<body data-page="testing">
+<div id="nav-container"></div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-heading">Testing</div>
+    <a href="#setup">Setup &amp; Dependencies</a>
+    <a href="#coroutines">Coroutines</a>
+    <a href="#flow">Flow &amp; Turbine</a>
+    <a href="#viewmodel">ViewModel</a>
+    <a href="#compose-ui">Compose UI</a>
+    <a href="#espresso">Espresso</a>
+  </aside>
+
+  <main class="content">
+    <div class="page-hero">
+      <h1>Testing</h1>
+      <p>Unit testing coroutines and Flow with <code>runTest</code> and Turbine, ViewModel state assertions, Compose semantics tests, and Espresso UI tests.</p>
+    </div>
+
+    <!-- SETUP -->
+    <div class="subsection" id="setup">
+      <div class="sub-header">
+        <h2>Setup &amp; Dependencies</h2>
+        <a class="doc-link" href="https://developer.android.com/jetpack/compose/testing" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Add test dependencies to your version catalog. Most live in <code>testImplementation</code>; Espresso and Compose UI tests go in <code>androidTestImplementation</code>.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">TOML / Gradle</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-deps-q" class="language-kotlin"></code></pre>
+      </div>
+    </div>
+
+    <!-- COROUTINES -->
+    <div class="subsection" id="coroutines">
+      <div class="sub-header">
+        <h2>Coroutines</h2>
+        <a class="doc-link" href="https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-test/" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Use <code>runTest</code> to run suspending code in a test. Swap <code>Dispatchers.Main</code> with <code>UnconfinedTestDispatcher</code> or <code>StandardTestDispatcher</code> via <code>Dispatchers.setMain()</code>.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-coro-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-coro-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>StandardTestDispatcher:</strong> Coroutines do NOT run automatically. You advance time manually with <code>advanceUntilIdle()</code>, <code>advanceTimeBy(ms)</code>, or <code>runCurrent()</code>. Gives precise control over ordering.</p>
+            <p><strong>UnconfinedTestDispatcher:</strong> Coroutines run eagerly on the current thread as soon as they are launched. Simpler for tests that don't care about ordering. Good default for most ViewModel tests.</p>
+            <p><strong>Dispatchers.setMain / resetMain:</strong> Must be paired — always reset in <code>@After</code> (or use <code>MainDispatcherRule</code> which does this automatically).</p>
+            <p><strong>advanceTimeBy:</strong> Useful for testing <code>delay()</code>, <code>debounce()</code>, <code>withTimeout()</code> without actually waiting.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- FLOW & TURBINE -->
+    <div class="subsection" id="flow">
+      <div class="sub-header">
+        <h2>Flow &amp; Turbine</h2>
+        <a class="doc-link" href="https://github.com/cashapp/turbine" target="_blank">📖 Turbine Docs</a>
+      </div>
+      <p class="sub-desc">Turbine makes testing <code>Flow</code> emissions simple. Call <code>flow.test { }</code> and assert items one by one with <code>awaitItem()</code>, <code>awaitComplete()</code>, and <code>awaitError()</code>.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-flow-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-flow-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>awaitItem():</strong> Suspends until the next emission arrives. Fails the test if nothing is emitted within the timeout (default 1 s).</p>
+            <p><strong>awaitComplete():</strong> Asserts the flow completed normally. Fails if an error or more items arrive first.</p>
+            <p><strong>awaitError():</strong> Asserts the flow terminated with an exception.</p>
+            <p><strong>cancelAndConsumeRemainingEvents():</strong> Cancels collection and returns any unconsumed events — useful when you only care about the first N emissions.</p>
+            <p><strong>Testing StateFlow:</strong> StateFlow always emits the current value on collection. Your first <code>awaitItem()</code> will be the initial state — assert it explicitly before triggering actions.</p>
+            <p><strong>turbineScope { }:</strong> Test multiple flows in parallel without nesting. Each flow gets its own <code>ReceiveTurbine</code>.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- VIEWMODEL -->
+    <div class="subsection" id="viewmodel">
+      <div class="sub-header">
+        <h2>ViewModel</h2>
+        <a class="doc-link" href="https://developer.android.com/topic/libraries/architecture/viewmodel/viewmodel-testing" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Test ViewModel state by collecting its <code>StateFlow</code> inside <code>runTest</code>. Use <code>MainDispatcherRule</code> to replace <code>Dispatchers.Main</code>, and mock the repository with a fake or Mockito/MockK stub.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-vm-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-vm-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>MainDispatcherRule:</strong> A JUnit4 <code>TestRule</code> that sets <code>Dispatchers.Main</code> to an <code>UnconfinedTestDispatcher</code> before each test and resets it after. Eliminates the <code>@Before</code>/<code>@After</code> boilerplate.</p>
+            <p><strong>Fake vs Mock:</strong> Prefer hand-written fakes (implement the interface with controllable behavior) over mocks for repositories — they're more readable and don't couple tests to implementation details.</p>
+            <p><strong>stateIn + WhileSubscribed:</strong> In tests, start collecting <em>before</em> calling ViewModel actions. <code>WhileSubscribed(5000)</code> only activates the upstream when there's a subscriber.</p>
+            <p><strong>SavedStateHandle:</strong> Pass a real <code>SavedStateHandle(mapOf("key" to value))</code> in unit tests — no mocking needed.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- COMPOSE UI -->
+    <div class="subsection" id="compose-ui">
+      <div class="sub-header">
+        <h2>Compose UI Tests</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/testing" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Use <code>createComposeRule()</code> to set Compose content and interact via semantic finders. No Espresso needed — Compose has its own test APIs.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-compose-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-compose-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>Finders:</strong> <code>onNodeWithText()</code>, <code>onNodeWithTag()</code>, <code>onNodeWithContentDescription()</code>, <code>onNodeWithRole()</code>, <code>onAllNodesWithText()</code>.</p>
+            <p><strong>Actions:</strong> <code>performClick()</code>, <code>performTextInput()</code>, <code>performTextClearance()</code>, <code>performScrollTo()</code>, <code>performTouchInput { swipeUp() }</code>.</p>
+            <p><strong>Assertions:</strong> <code>assertIsDisplayed()</code>, <code>assertIsEnabled()</code>, <code>assertIsNotEnabled()</code>, <code>assertTextEquals()</code>, <code>assertContentDescriptionEquals()</code>, <code>assertDoesNotExist()</code>.</p>
+            <p><strong>testTag:</strong> Add <code>Modifier.testTag("my_tag")</code> to composables and find with <code>onNodeWithTag("my_tag")</code> — more stable than text-based finders when UI copy changes.</p>
+            <p><strong>waitUntil:</strong> Use <code>composeRule.waitUntil { condition }</code> for async state changes instead of <code>Thread.sleep()</code>.</p>
+            <p><strong>createAndroidComposeRule:</strong> Use instead of <code>createComposeRule()</code> when you need access to the real Activity (e.g. to test navigation or system back).</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- ESPRESSO -->
+    <div class="subsection" id="espresso">
+      <div class="sub-header">
+        <h2>Espresso</h2>
+        <a class="doc-link" href="https://developer.android.com/training/testing/espresso" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Espresso drives the real Android UI on a device or emulator. Use for View-based screens, navigation flows, or when you need to verify real Activity lifecycle behavior.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-esp-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-esp-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>ViewMatchers:</strong> <code>withId(R.id.btn)</code>, <code>withText("OK")</code>, <code>withContentDescription()</code>, <code>isDisplayed()</code>, <code>isEnabled()</code>, <code>hasSibling()</code>, <code>hasDescendant()</code>.</p>
+            <p><strong>ViewActions:</strong> <code>click()</code>, <code>typeText()</code>, <code>replaceText()</code>, <code>clearText()</code>, <code>pressBack()</code>, <code>pressImeActionButton()</code>, <code>scrollTo()</code>, <code>swipeUp()</code>.</p>
+            <p><strong>ViewAssertions:</strong> <code>matches(isDisplayed())</code>, <code>matches(withText("..."))</code>, <code>doesNotExist()</code>.</p>
+            <p><strong>IdlingResource:</strong> Register an <code>IdlingResource</code> to tell Espresso to wait for async work (network, database) before asserting. Without it, assertions run before the UI updates.</p>
+            <p><strong>Espresso + Compose:</strong> In mixed View/Compose screens use both APIs. Access the Compose node tree from Espresso via <code>onView(isRoot()).check { ... }</code> or just use <code>ComposeTestRule</code> alongside Espresso in the same test class.</p>
+            <p><strong>Interview tip:</strong> Espresso synchronizes automatically with the main thread and <code>AsyncTask</code> (legacy). For coroutines/Retrofit you need a custom <code>IdlingResource</code> or OkHttp <code>IdlingResource</code>.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const CODE = {};
+
+CODE['deps-q'] = `# libs.versions.toml
+[versions]
+coroutines-test = "1.8.1"
+turbine         = "1.1.0"
+mockk           = "1.13.10"
+compose-test    = "1.7.0"
+espresso        = "3.6.1"
+
+[libraries]
+# Unit tests (testImplementation)
+coroutines-test  = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines-test" }
+turbine          = { module = "app.cash.turbine:turbine",                       version.ref = "turbine" }
+mockk            = { module = "io.mockk:mockk",                                version.ref = "mockk" }
+junit            = { module = "junit:junit",                                    version = "4.13.2" }
+
+# Instrumented tests (androidTestImplementation)
+compose-ui-test        = { module = "androidx.compose.ui:ui-test-junit4",      version.ref = "compose-test" }
+compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest",  version.ref = "compose-test" }
+espresso-core          = { module = "androidx.test.espresso:espresso-core",     version.ref = "espresso" }
+espresso-intents       = { module = "androidx.test.espresso:espresso-intents",  version.ref = "espresso" }
+
+# build.gradle.kts
+testImplementation(libs.coroutines.test)
+testImplementation(libs.turbine)
+testImplementation(libs.mockk)
+testImplementation(libs.junit)
+androidTestImplementation(libs.compose.ui.test)
+debugImplementation(libs.compose.ui.test.manifest)
+androidTestImplementation(libs.espresso.core)`;
+
+CODE['coro-q'] = `class MyTest {
+
+    // Replaces Dispatchers.Main with a test dispatcher automatically
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+
+    @Test
+    fun \`delay completes after advancing time\`() = runTest {
+        var result = ""
+        launch {
+            delay(1_000)
+            result = "done"
+        }
+        advanceTimeBy(1_001)    // virtual time — no real waiting
+        assertEquals("done", result)
+    }
+}`;
+
+CODE['coro-f'] = `// MainDispatcherRule — reusable JUnit4 rule
+class MainDispatcherRule(
+    val dispatcher: TestDispatcher = UnconfinedTestDispatcher()
+) : TestWatcher() {
+    override fun starting(description: Description) = Dispatchers.setMain(dispatcher)
+    override fun finished(description: Description) = Dispatchers.resetMain()
+}
+
+// StandardTestDispatcher — manual time control
+@Test
+fun \`sequential coroutines run in order\`() = runTest {
+    val dispatcher = StandardTestDispatcher(testScheduler)
+    val results = mutableListOf<Int>()
+
+    launch(dispatcher) { results.add(1) }
+    launch(dispatcher) { results.add(2) }
+
+    runCurrent()                    // run all coroutines queued so far
+    assertEquals(listOf(1, 2), results)
+}
+
+// advanceTimeBy — test debounce / delay without sleeping
+@Test
+fun \`debounced search fires after 300ms\`() = runTest {
+    val vm = SearchViewModel(fakeApi)
+    vm.onQueryChange("kotlin")
+
+    advanceTimeBy(299)
+    assertEquals(emptyList(), vm.results.value)   // not yet
+
+    advanceTimeBy(1)                              // 300ms total
+    advanceUntilIdle()
+    assertEquals(listOf("Kotlin result"), vm.results.value)
+}
+
+// withContext(Dispatchers.IO) — inject dispatcher for testability
+class UserRepository(
+    private val api: UserApi,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+) {
+    suspend fun getUser(id: String) = withContext(ioDispatcher) { api.getUser(id) }
+}
+
+// In test — pass UnconfinedTestDispatcher
+val repo = UserRepository(fakeApi, UnconfinedTestDispatcher())`;
+
+CODE['flow-q'] = `@Test
+fun \`StateFlow emits loading then success\`() = runTest {
+    val vm = UserViewModel(FakeUserRepository())
+
+    vm.uiState.test {
+        assertEquals(UiState.Loading, awaitItem())    // initial state
+        assertEquals(UiState.Success(fakeUser), awaitItem())
+        cancelAndIgnoreRemainingEvents()
+    }
+}`;
+
+CODE['flow-f'] = `// Testing a plain Flow
+@Test
+fun \`flow emits 1 2 3 then completes\`() = runTest {
+    val flow = flowOf(1, 2, 3)
+    flow.test {
+        assertEquals(1, awaitItem())
+        assertEquals(2, awaitItem())
+        assertEquals(3, awaitItem())
+        awaitComplete()
+    }
+}
+
+// Testing error emission
+@Test
+fun \`flow emits error on network failure\`() = runTest {
+    val flow = flow<User> { throw IOException("No connection") }
+    flow.test {
+        val error = awaitError()
+        assertIs<IOException>(error)
+        assertEquals("No connection", error.message)
+    }
+}
+
+// Testing SharedFlow events (one-shot effects)
+@Test
+fun \`navigation event emitted on button click\`() = runTest {
+    val vm = LoginViewModel(fakeAuthRepo)
+
+    vm.events.test {
+        vm.onLoginClick("user@example.com", "password")
+        assertEquals(LoginEvent.NavigateToHome, awaitItem())
+        cancelAndIgnoreRemainingEvents()
+    }
+}
+
+// turbineScope — multiple flows in parallel
+@Test
+fun \`search updates both results and loading state\`() = runTest {
+    val vm = SearchViewModel(fakeApi)
+
+    turbineScope {
+        val stateTurbine   = vm.uiState.testIn(backgroundScope)
+        val resultsTurbine = vm.results.testIn(backgroundScope)
+
+        assertEquals(UiState.Idle, stateTurbine.awaitItem())
+        assertEquals(emptyList(), resultsTurbine.awaitItem())
+
+        vm.search("kotlin")
+
+        assertEquals(UiState.Loading, stateTurbine.awaitItem())
+        assertEquals(UiState.Success, stateTurbine.awaitItem())
+        assertEquals(listOf("Kotlin result"), resultsTurbine.awaitItem())
+    }
+}`;
+
+CODE['vm-q'] = `@get:Rule
+val mainDispatcherRule = MainDispatcherRule()
+
+private lateinit var vm: UserViewModel
+private val fakeRepo = FakeUserRepository()
+
+@Before
+fun setup() {
+    vm = UserViewModel(fakeRepo)
+}
+
+@Test
+fun \`loading state then user displayed\`() = runTest {
+    fakeRepo.setUser(fakeUser)
+
+    vm.uiState.test {
+        assertEquals(UserUiState(isLoading = true), awaitItem())
+        assertEquals(UserUiState(user = fakeUser), awaitItem())
+        cancelAndIgnoreRemainingEvents()
+    }
+}`;
+
+CODE['vm-f'] = `// Fake repository — no mocking framework needed
+class FakeUserRepository : UserRepository {
+    private var result: Result<User> = Result.failure(IllegalStateException("Not set"))
+
+    fun setUser(user: User) { result = Result.success(user) }
+    fun setError(e: Throwable) { result = Result.failure(e) }
+
+    override suspend fun getUser(id: String): User = result.getOrThrow()
+}
+
+// ViewModel under test
+class UserViewModel(private val repo: UserRepository) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(UserUiState(isLoading = true))
+    val uiState: StateFlow<UserUiState> = _uiState.asStateFlow()
+
+    init { loadUser("42") }
+
+    fun loadUser(id: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val user = repo.getUser(id)
+                _uiState.update { it.copy(isLoading = false, user = user) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+}
+
+// Test with MockK for more complex dependencies
+@Test
+fun \`error state shown on network failure\`() = runTest {
+    val mockRepo = mockk<UserRepository>()
+    coEvery { mockRepo.getUser(any()) } throws IOException("timeout")
+
+    val vm = UserViewModel(mockRepo)
+
+    vm.uiState.test {
+        awaitItem()  // loading
+        val error = awaitItem()
+        assertEquals("timeout", error.error)
+        cancelAndIgnoreRemainingEvents()
+    }
+}
+
+// SavedStateHandle — no mocking needed
+@Test
+fun \`reads nav arg from SavedStateHandle\`() = runTest {
+    val savedState = SavedStateHandle(mapOf("userId" to "99"))
+    val vm = ProfileViewModel(fakeRepo, savedState)
+    assertEquals("99", vm.userId)
+}`;
+
+CODE['compose-q'] = `@RunWith(AndroidJUnit4::class)
+class CounterScreenTest {
+
+    @get:Rule
+    val composeRule = createComposeRule()
+
+    @Test
+    fun incrementButtonUpdatesCount() {
+        composeRule.setContent {
+            CounterScreen()
+        }
+
+        composeRule.onNodeWithText("Count: 0").assertIsDisplayed()
+        composeRule.onNodeWithText("+").performClick()
+        composeRule.onNodeWithText("Count: 1").assertIsDisplayed()
+    }
+}`;
+
+CODE['compose-f'] = `@RunWith(AndroidJUnit4::class)
+class LoginScreenTest {
+
+    @get:Rule
+    val composeRule = createComposeRule()
+
+    @Test
+    fun \`login button disabled when fields empty\`() {
+        composeRule.setContent { LoginScreen(onLogin = {}) }
+
+        composeRule.onNodeWithTag("login_button").assertIsNotEnabled()
+    }
+
+    @Test
+    fun \`login button enabled after valid input\`() {
+        composeRule.setContent { LoginScreen(onLogin = {}) }
+
+        composeRule.onNodeWithTag("email_field")
+            .performTextInput("user@example.com")
+        composeRule.onNodeWithTag("password_field")
+            .performTextInput("password123")
+
+        composeRule.onNodeWithTag("login_button").assertIsEnabled()
+    }
+
+    @Test
+    fun \`error message shown on bad credentials\`() {
+        var callbackFired = false
+        composeRule.setContent {
+            LoginScreen(onLogin = { callbackFired = true })
+        }
+
+        composeRule.onNodeWithTag("email_field").performTextInput("bad@test.com")
+        composeRule.onNodeWithTag("password_field").performTextInput("wrong")
+        composeRule.onNodeWithTag("login_button").performClick()
+
+        // Wait for async state change
+        composeRule.waitUntil(timeoutMillis = 3_000) {
+            composeRule.onAllNodesWithText("Invalid credentials").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Invalid credentials").assertIsDisplayed()
+    }
+
+    @Test
+    fun \`list renders all items\`() {
+        val items = listOf("Alpha", "Beta", "Gamma")
+        composeRule.setContent { ItemList(items = items) }
+
+        items.forEach { label ->
+            composeRule.onNodeWithText(label).assertIsDisplayed()
+        }
+    }
+}
+
+// Modifier.testTag usage in production composable
+@Composable
+fun LoginScreen(onLogin: (String, String) -> Unit) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    Column {
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            modifier = Modifier.testTag("email_field")
+        )
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            modifier = Modifier.testTag("password_field")
+        )
+        Button(
+            onClick = { onLogin(email, password) },
+            enabled = email.isNotBlank() && password.isNotBlank(),
+            modifier = Modifier.testTag("login_button")
+        ) { Text("Login") }
+    }
+}`;
+
+CODE['esp-q'] = `@RunWith(AndroidJUnit4::class)
+@LargeTest
+class MainActivityTest {
+
+    @get:Rule
+    val activityRule = ActivityScenarioRule(MainActivity::class.java)
+
+    @Test
+    fun clickButtonShowsMessage() {
+        onView(withId(R.id.btn_submit)).perform(click())
+        onView(withText("Submitted!")).check(matches(isDisplayed()))
+    }
+}`;
+
+CODE['esp-f'] = `@RunWith(AndroidJUnit4::class)
+@LargeTest
+class LoginActivityTest {
+
+    @get:Rule
+    val activityRule = ActivityScenarioRule(LoginActivity::class.java)
+
+    @Test
+    fun \`valid credentials navigate to home\`() {
+        onView(withId(R.id.et_email))
+            .perform(typeText("user@example.com"), closeSoftKeyboard())
+        onView(withId(R.id.et_password))
+            .perform(typeText("password123"), closeSoftKeyboard())
+        onView(withId(R.id.btn_login))
+            .perform(click())
+
+        // Verify HomeActivity launched
+        onView(withId(R.id.tv_welcome)).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun \`empty email shows validation error\`() {
+        onView(withId(R.id.btn_login)).perform(click())
+        onView(withText("Email is required")).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun \`back press returns to previous screen\`() {
+        onView(withId(R.id.btn_register)).perform(click())
+        onView(withId(R.id.tv_register_title)).check(matches(isDisplayed()))
+        pressBack()
+        onView(withId(R.id.btn_login)).check(matches(isDisplayed()))
+    }
+}
+
+// RecyclerView interaction (espresso-contrib)
+@Test
+fun \`list item click opens detail\`() {
+    onView(withId(R.id.recycler_view))
+        .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
+    onView(withId(R.id.tv_detail_title)).check(matches(isDisplayed()))
+}
+
+// Intents — verify the right Intent was fired
+@RunWith(AndroidJUnit4::class)
+class ShareTest {
+
+    @get:Rule
+    val intentsRule = IntentsRule()
+
+    @Test
+    fun \`share button fires share intent\`() {
+        onView(withId(R.id.btn_share)).perform(click())
+        intended(hasAction(Intent.ACTION_CHOOSER))
+    }
+}
+
+// IdlingResource — wait for coroutine / network before asserting
+class CoroutineIdlingResource : IdlingResource {
+    private var idle = true
+    private var callback: IdlingResource.ResourceCallback? = null
+
+    override fun getName() = "CoroutineIdlingResource"
+    override fun isIdleNow() = idle
+    override fun registerIdleTransitionCallback(cb: IdlingResource.ResourceCallback) { callback = cb }
+
+    fun setIdle(isIdle: Boolean) {
+        idle = isIdle
+        if (isIdle) callback?.onTransitionToIdle()
+    }
+}`;
+
+initCode(CODE);
+</script>
+</body>
+</html>
