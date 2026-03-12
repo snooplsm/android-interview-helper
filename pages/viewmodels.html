@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ViewModels – Android Compose Guide</title>
+  <script>(function(){ document.documentElement.dataset.theme = localStorage.getItem('guide-theme') || 'light'; })();</script>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+</head>
+<body data-page="viewmodels">
+<div id="nav-container"></div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-heading">ViewModels</div>
+    <a href="#basic">Basic ViewModel</a>
+    <a href="#key">ViewModel with Key</a>
+    <a href="#factory">Custom Factory</a>
+    <a href="#hilt-vm">With Hilt</a>
+    <a href="#shared-vm">Shared ViewModel</a>
+  </aside>
+
+  <main class="content">
+    <div class="page-hero">
+      <h1>ViewModels</h1>
+      <p>Survives config changes, hosts UI state, and delegates business logic to repositories.</p>
+    </div>
+
+    <!-- BASIC -->
+    <div class="subsection" id="basic">
+      <div class="sub-header">
+        <h2>Basic ViewModel</h2>
+        <a class="doc-link" href="https://developer.android.com/topic/libraries/architecture/viewmodel" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Extend <code>ViewModel</code> and expose state via <code>StateFlow</code>. Use <code>viewModelScope</code> for coroutines — it's automatically cancelled in <code>onCleared()</code>.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-basic-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-basic-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- KEY -->
+    <div class="subsection" id="key">
+      <div class="sub-header">
+        <h2>ViewModel with Key</h2>
+        <a class="doc-link" href="https://developer.android.com/topic/libraries/architecture/viewmodel/viewmodel-apis" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">By default, <code>viewModel()</code> returns the same instance per scope. Provide a key to get separate instances (e.g., one per list item).</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-key-q" class="language-kotlin"></code></pre>
+      </div>
+    </div>
+
+    <!-- FACTORY -->
+    <div class="subsection" id="factory">
+      <div class="sub-header">
+        <h2>Custom Factory</h2>
+        <a class="doc-link" href="https://developer.android.com/topic/libraries/architecture/viewmodel/viewmodel-factories" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Use a factory when the ViewModel needs constructor parameters that aren't injectable via DI. Two approaches: classic <code>Factory</code> class or modern <code>viewModelFactory { }</code> DSL.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-factory-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-factory-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- HILT VM -->
+    <div class="subsection" id="hilt-vm">
+      <div class="sub-header">
+        <h2>With Hilt</h2>
+        <a class="doc-link" href="https://developer.android.com/training/dependency-injection/hilt-jetpack#viewmodels" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Annotate with <code>@HiltViewModel</code> and <code>@Inject constructor</code>. Hilt generates the factory. Use <code>hiltViewModel()</code> in Compose.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-hiltvm-q" class="language-kotlin"></code></pre>
+      </div>
+    </div>
+
+    <!-- SHARED -->
+    <div class="subsection" id="shared-vm">
+      <div class="sub-header">
+        <h2>Shared ViewModel</h2>
+        <a class="doc-link" href="https://developer.android.com/topic/libraries/architecture/viewmodel/viewmodel-apis#sharing" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Share a ViewModel across multiple screens in a navigation graph by scoping it to a <code>NavBackStackEntry</code>.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-shared-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-shared-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const CODE = {
+'basic-q': `class CounterViewModel : ViewModel() {
+    private val _count = MutableStateFlow(0)
+    val count: StateFlow<Int> = _count.asStateFlow()
+
+    fun increment() { _count.update { it + 1 } }
+}
+
+// In Composable
+val vm: CounterViewModel = viewModel()
+val count by vm.count.collectAsStateWithLifecycle()`,
+'basic-f': `class UserListViewModel(private val repository: UserRepository) : ViewModel() {
+
+    private val _state = MutableStateFlow(UserListState())
+    val state: StateFlow<UserListState> = _state.asStateFlow()
+
+    init { loadUsers() }
+
+    private fun loadUsers() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            try {
+                repository.getUsers()
+                    .collect { users ->
+                        _state.update { it.copy(users = users, isLoading = false) }
+                    }
+            } catch (e: Exception) {
+                _state.update { it.copy(error = e.message, isLoading = false) }
+            }
+        }
+    }
+
+    fun refresh() { loadUsers() }
+
+    override fun onCleared() {
+        super.onCleared()
+        // viewModelScope is cancelled automatically — no manual cleanup needed
+    }
+}
+
+data class UserListState(
+    val users: List<User> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: String? = null
+)`,
+
+'key-q': `// Default — same instance for the whole screen
+val vm: ItemViewModel = viewModel()
+
+// Keyed — separate instance per item
+@Composable
+fun ItemRow(itemId: String) {
+    val vm: ItemViewModel = viewModel(key = itemId)
+    // Each itemId gets its own ViewModel instance
+}
+
+// With Hilt
+val vm: ItemViewModel = hiltViewModel(key = itemId)`,
+
+'factory-q': `// Classic factory
+class DetailViewModelFactory(private val productId: String) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(DetailViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return DetailViewModel(productId) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel: \${modelClass.name}")
+    }
+}
+
+// Usage
+val vm: DetailViewModel = viewModel(factory = DetailViewModelFactory(productId))`,
+'factory-f': `// Modern approach — viewModelFactory DSL (Lifecycle 2.5+)
+class DetailViewModel(val productId: String, val repo: ProductRepository) : ViewModel() {
+
+    companion object {
+        fun factory(productId: String, repo: ProductRepository) = viewModelFactory {
+            initializer {
+                DetailViewModel(productId, repo)
+            }
+        }
+    }
+}
+
+// Usage
+val vm = viewModel<DetailViewModel>(
+    factory = DetailViewModel.factory(productId, repository)
+)
+
+// Access Application via APPLICATION_KEY (no need to pass context)
+val AppViewModelFactory = viewModelFactory {
+    initializer {
+        val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as MyApplication
+        UserViewModel(app.container.userRepository)
+    }
+}`,
+
+'hiltvm-q': `@HiltViewModel
+class SearchViewModel @Inject constructor(
+    private val repository: SearchRepository,
+    private val savedState: SavedStateHandle   // automatically injected by Hilt
+) : ViewModel() {
+
+    // Read nav args from SavedStateHandle
+    val query = savedState.getStateFlow("query", "")
+
+    val results: StateFlow<List<Result>> = query
+        .flatMapLatest { repository.search(it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+}
+
+// In Composable (no factory needed)
+val vm: SearchViewModel = hiltViewModel()`,
+
+'shared-q': `// Scope ViewModel to a nav graph
+val navController = rememberNavController()
+
+NavHost(navController, startDestination = "checkout") {
+    navigation(route = "checkout", startDestination = "cart") {
+        composable("cart") {
+            val entry = navController.getBackStackEntry("checkout")
+            val vm: CheckoutViewModel = hiltViewModel(entry)
+            CartScreen(vm)
+        }
+        composable("payment") {
+            val entry = navController.getBackStackEntry("checkout")
+            val vm: CheckoutViewModel = hiltViewModel(entry)
+            PaymentScreen(vm)  // same instance as CartScreen
+        }
+    }
+}`,
+'shared-f': `// Both Cart and Payment share this single ViewModel
+@HiltViewModel
+class CheckoutViewModel @Inject constructor(
+    private val orderRepo: OrderRepository
+) : ViewModel() {
+
+    private val _order = MutableStateFlow(Order())
+    val order: StateFlow<Order> = _order.asStateFlow()
+
+    fun addItem(item: CartItem) { _order.update { it.copy(items = it.items + item) } }
+    fun setPaymentMethod(method: PaymentMethod) { _order.update { it.copy(payment = method) } }
+
+    fun placeOrder() {
+        viewModelScope.launch {
+            orderRepo.place(_order.value)
+        }
+    }
+}
+
+// ViewModel is cleared when the "checkout" graph is popped off the back stack
+// — perfect lifetime for a multi-step flow`
+};
+
+initCode(CODE);
+</script>
+</body>
+</html>

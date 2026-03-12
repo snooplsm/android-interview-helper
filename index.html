@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Android Jetpack Compose Interview Guide</title>
+  <script>(function(){ document.documentElement.dataset.theme = localStorage.getItem('guide-theme') || 'light'; })();</script>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+  <style>
+    .hero {
+      max-width: 680px;
+      margin: 90px auto 0;
+      padding: 48px 24px 60px;
+      text-align: center;
+    }
+    .hero h1 { font-size: 2.6rem; color: var(--primary); margin-bottom: 10px; font-weight: 800; }
+    .hero p  { font-size: 1rem; color: var(--on-surface-variant); margin-bottom: 32px; }
+
+    /* Big search bar */
+    .hero-search-wrap {
+      position: relative;
+      margin-bottom: 16px;
+    }
+    .hero-search-wrap svg {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--on-surface-variant);
+      pointer-events: none;
+    }
+    .hero-search {
+      width: 100%;
+      padding: 16px 18px 16px 50px;
+      font-size: 1.1rem;
+      border: 2px solid var(--outline);
+      border-radius: 28px;
+      background: var(--surface);
+      color: var(--on-surface);
+      font-family: inherit;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .hero-search:focus {
+      border-color: var(--primary);
+      box-shadow: 0 4px 20px rgba(103,80,164,.15);
+    }
+    .hero-search::placeholder { color: var(--on-surface-variant); }
+
+    /* Global search results */
+    .hero-results {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0; right: 0;
+      background: var(--surface);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 32px rgba(0,0,0,.12);
+      max-height: 60vh;
+      overflow-y: auto;
+      z-index: 300;
+      text-align: left;
+      display: none;
+    }
+    .hero-results.open { display: block; }
+    .hero-result {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--outline-variant);
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .hero-result:last-child { border-bottom: none; }
+    .hero-result:hover { background: var(--surface-variant); }
+    .hr-section { font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--primary); }
+    .hr-title   { font-size: .92rem; font-weight: 600; color: var(--on-surface); }
+    .hr-snippet { font-size: .8rem; color: var(--on-surface-variant); margin-top: 2px; }
+    .hr-snippet mark { background: var(--primary-container); color: var(--on-primary-container); border-radius: 2px; padding: 0 2px; }
+    .search-empty { padding: 24px; text-align: center; color: var(--on-surface-variant); }
+
+  </style>
+</head>
+<body>
+<div id="nav-container"></div>
+
+<div class="hero">
+  <h1>Android Compose<br>Interview Guide</h1>
+  <p>Jetpack Compose, coroutines, DI, storage, Gradle, and design patterns — all in one place.</p>
+
+  <div class="hero-search-wrap">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input
+      class="hero-search"
+      id="heroSearch"
+      type="search"
+      placeholder="Search topics, e.g. LaunchedEffect, Hilt, stateIn…"
+      autocomplete="off"
+    >
+    <div class="hero-results" id="heroResults"></div>
+  </div>
+</div>
+
+<footer>
+  <h4>Useful Resources</h4>
+  <div class="footer-links">
+    <a href="https://fonts.google.com/icons" target="_blank">🎨 Android Icons (Material Symbols)</a>
+    <a href="https://developer.android.com" target="_blank">Android Developer</a>
+    <a href="https://developer.android.com/jetpack/compose" target="_blank">Jetpack Compose</a>
+    <a href="https://m3.material.io" target="_blank">Material Design 3</a>
+    <a href="https://kotlinlang.org/docs/coroutines-guide.html" target="_blank">Kotlin Coroutines Guide</a>
+    <a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/package-summary" target="_blank">Compose API Reference</a>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+// Global search index — covers all sections across all pages
+const SEARCH_INDEX = [
+  // UI
+  { section:'UI', title:'Row', desc:'Horizontal layout. horizontalArrangement verticalAlignment Arrangement.SpaceBetween weight Modifier.weight fill remaining space icon title action', url:'pages/ui.html#row' },
+  { section:'UI', title:'Box', desc:'Stack children (FrameLayout). contentAlignment, Modifier.align, z-order, BoxWithConstraints', url:'pages/ui.html#box' },
+  { section:'UI', title:'Column', desc:'Vertical layout. verticalArrangement, horizontalAlignment, Arrangement.spacedBy', url:'pages/ui.html#column' },
+  { section:'UI', title:'Lazy Layouts', desc:'LazyColumn LazyRow LazyVerticalGrid. items itemsIndexed key contentType LazyListState animateScrollToItem', url:'pages/ui.html#lazy' },
+  { section:'UI', title:'Pagers', desc:'HorizontalPager VerticalPager rememberPagerState TabRow page indicator', url:'pages/ui.html#pagers' },
+  { section:'UI', title:'Image', desc:'painterResource vector drawable Icons.Default Icons.Outlined AsyncImage Coil ContentScale', url:'pages/ui.html#image' },
+  { section:'UI', title:'Shapes / RoundRect', desc:'RoundedCornerShape clip background Card shape MaterialTheme.shapes', url:'pages/ui.html#shapes' },
+  { section:'UI', title:'ConstraintLayout', desc:'constrainAs createRefs linkTo Guideline Barrier Chain ConstraintLayout compose', url:'pages/ui.html#constraintlayout' },
+  { section:'UI', title:'TextField / TextArea', desc:'TextField OutlinedTextField BasicTextField multiline minLines maxLines password VisualTransformation KeyboardOptions ImeAction FocusRequester', url:'pages/ui.html#textfield' },
+  { section:'UI', title:'Styling TextField', desc:'TextFieldDefaults.colors OutlinedTextFieldDefaults containerColor borderColor focusedBorderColor indicatorColor transparent pill shape decorationBox error supportingText BasicTextField cursorBrush', url:'pages/ui.html#textfield-style' },
+  { section:'UI', title:'Keyboard / IME Animation', desc:'imePadding imeNestedScroll isImeVisible hide show keyboard AnimatedVisibility animateDpAsState windowSoftInputMode WindowInsets FocusRequester shrink avatar', url:'pages/ui.html#keyboard' },
+  { section:'UI', title:'Animations', desc:'AnimatedVisibility fadeIn fadeOut slideInVertically slideOutVertically slideInHorizontally expandVertically shrinkVertically scaleIn scaleOut animateColorAsState animateDpAsState animateFloatAsState Crossfade AnimatedContent animateContentSize updateTransition rememberInfiniteTransition spring tween', url:'pages/ui.html#animations' },
+  { section:'UI', title:'remember', desc:'remember memoize recomposition rememberSaveable config change keys', url:'pages/ui.html#remember' },
+  { section:'UI', title:'mutableStateOf', desc:'mutableStateOf by remember mutableStateListOf mutableStateMapOf state hoisting', url:'pages/ui.html#mutablestate' },
+  { section:'UI', title:'derivedStateOf', desc:'derivedStateOf derived state recomposes when result changes scroll threshold', url:'pages/ui.html#derivedstate' },
+  { section:'UI', title:'LaunchedEffect', desc:'LaunchedEffect suspend coroutine side effect key cancel', url:'pages/ui.html#launchedeffect' },
+  { section:'UI', title:'SideEffect', desc:'SideEffect after recomposition non-compose analytics Firebase', url:'pages/ui.html#sideeffect' },
+  { section:'UI', title:'DisposableEffect', desc:'DisposableEffect onDispose cleanup lifecycle observer broadcast receiver', url:'pages/ui.html#disposableeffect' },
+  // Theming
+  { section:'Theming', title:'Light & Dark Theme', desc:'lightColorScheme darkColorScheme isSystemInDarkTheme dynamicColor MaterialTheme', url:'pages/theming.html#light-dark' },
+  { section:'Theming', title:'Custom Color Attributes', desc:'ExtendedColors staticCompositionLocalOf CompositionLocalProvider custom tokens', url:'pages/theming.html#custom-colors' },
+  { section:'Theming', title:'CompositionLocal', desc:'CompositionLocal compositionLocalOf staticCompositionLocalOf LocalContext LocalDensity provide', url:'pages/theming.html#composition-local' },
+  { section:'Theming', title:'Typography', desc:'Typography TextStyle FontFamily FontWeight letterSpacing lineHeight', url:'pages/theming.html#typography' },
+  // Coroutines
+  { section:'Coroutines', title:'Scopes', desc:'viewModelScope lifecycleScope GlobalScope rememberCoroutineScope repeatOnLifecycle CoroutineScope SupervisorJob', url:'pages/coroutines.html#scopes' },
+  { section:'Coroutines', title:'launch & async', desc:'launch async await Deferred Job fire and forget parallel concurrent awaitAll', url:'pages/coroutines.html#launch-async' },
+  { section:'Coroutines', title:'withContext & Dispatchers', desc:'withContext Dispatchers.IO Dispatchers.Main Dispatchers.Default suspend thread switch', url:'pages/coroutines.html#withcontext' },
+  { section:'Coroutines', title:'Cancellation & Timeout', desc:'cancel ensureActive isActive withTimeout withTimeoutOrNull CancellationException finally', url:'pages/coroutines.html#cancellation' },
+  { section:'Coroutines', title:'Error Handling', desc:'CoroutineExceptionHandler try catch supervisorScope SupervisorJob runCatching', url:'pages/coroutines.html#error-handling' },
+  // Flow
+  { section:'Flow', title:'StateFlow & SharedFlow', desc:'MutableStateFlow MutableSharedFlow asStateFlow asSharedFlow emit update', url:'pages/flow.html#stateflow' },
+  { section:'Flow', title:'collect & collectLatest', desc:'collect collectLatest terminal operator collectAsState collectAsStateWithLifecycle', url:'pages/flow.html#collect' },
+  { section:'Flow', title:'launchIn', desc:'launchIn onEach scope launch collect shorthand', url:'pages/flow.html#launchin' },
+  { section:'Flow', title:'combine & zip', desc:'combine zip merge latest both flows interleave pair', url:'pages/flow.html#combine' },
+  { section:'Flow', title:'Common Operators', desc:'map filter take distinctUntilChanged debounce flatMapLatest flatMapConcat catch onStart onCompletion sortedBy', url:'pages/flow.html#operators' },
+  { section:'Flow', title:'stateIn & shareIn', desc:'stateIn shareIn WhileSubscribed Eagerly Lazily hot cold convert SharingStarted', url:'pages/flow.html#statein' },
+  // ViewModels
+  { section:'ViewModels', title:'Basic ViewModel', desc:'ViewModel viewModelScope onCleared StateFlow MutableStateFlow', url:'pages/viewmodels.html#basic' },
+  { section:'ViewModels', title:'ViewModel with Key', desc:'viewModel key separate instance hiltViewModel', url:'pages/viewmodels.html#key' },
+  { section:'ViewModels', title:'Custom Factory', desc:'ViewModelProvider.Factory viewModelFactory CreationExtras APPLICATION_KEY', url:'pages/viewmodels.html#factory' },
+  { section:'ViewModels', title:'With Hilt', desc:'HiltViewModel @Inject constructor hiltViewModel SavedStateHandle', url:'pages/viewmodels.html#hilt-vm' },
+  { section:'ViewModels', title:'Shared ViewModel', desc:'Shared ViewModel NavBackStackEntry getBackStackEntry navigation graph scope', url:'pages/viewmodels.html#shared-vm' },
+  // DI
+  { section:'DI / No DI', title:'Hilt', desc:'HiltAndroidApp Module InstallIn Provides Singleton Binds AndroidEntryPoint Qualifier', url:'pages/di.html#hilt' },
+  { section:'DI / No DI', title:'Dagger', desc:'Component Subcomponent Module inject DaggerAppComponent Builder Factory scope', url:'pages/di.html#dagger' },
+  { section:'DI / No DI', title:'Koin', desc:'module single factory viewModel startKoin koinViewModel inject DSL', url:'pages/di.html#koin' },
+  { section:'DI / No DI', title:'No DI', desc:'Service Locator AppContainer singleton manual constructor injection without framework', url:'pages/di.html#no-di' },
+  // Permissions
+  { section:'Permissions', title:'Single Permission', desc:'rememberLauncherForActivityResult RequestPermission CAMERA LOCATION', url:'pages/permissions.html#single' },
+  { section:'Permissions', title:'Multiple Permissions', desc:'RequestMultiplePermissions Map Boolean array', url:'pages/permissions.html#multiple' },
+  { section:'Permissions', title:'After Denied / Rationale', desc:'shouldShowRequestPermissionRationale rationale dialog deny AlertDialog', url:'pages/permissions.html#rationale' },
+  { section:'Permissions', title:'Settings Redirect', desc:'ACTION_APPLICATION_DETAILS_SETTINGS permanently denied open settings', url:'pages/permissions.html#settings' },
+  { section:'Permissions', title:'Accompanist Permissions', desc:'rememberPermissionState rememberMultiplePermissionsState accompanist', url:'pages/permissions.html#accompanist' },
+  // Manifests
+  { section:'Manifests', title:'Permissions in Manifest', desc:'uses-permission normal dangerous INTERNET CAMERA FOREGROUND_SERVICE maxSdkVersion', url:'pages/manifests.html#permissions' },
+  { section:'Manifests', title:'Application Tag', desc:'android:name icon label theme allowBackup networkSecurityConfig', url:'pages/manifests.html#application' },
+  { section:'Manifests', title:'Activity', desc:'exported launchMode windowSoftInputMode configChanges intent-filter MAIN LAUNCHER', url:'pages/manifests.html#activity' },
+  { section:'Manifests', title:'Service in Manifest', desc:'foregroundServiceType service exported WorkManager disable initializer tools:node', url:'pages/manifests.html#service-tag' },
+  { section:'Manifests', title:'Receiver & Provider', desc:'BroadcastReceiver ContentProvider FileProvider BOOT_COMPLETED', url:'pages/manifests.html#receiver-provider' },
+  { section:'Manifests', title:'Deep Links', desc:'autoVerify App Links intent-filter VIEW BROWSABLE navDeepLink uriPattern', url:'pages/manifests.html#deeplinks' },
+  // Services
+  { section:'Services', title:'Service', desc:'Service onStartCommand START_STICKY START_NOT_STICKY START_REDELIVER_INTENT background', url:'pages/services.html#service' },
+  { section:'Services', title:'IntentService (deprecated)', desc:'IntentService deprecated API 30 background thread onHandleIntent', url:'pages/services.html#intentservice' },
+  { section:'Services', title:'BoundService', desc:'BoundService Binder LocalBinder onBind ServiceConnection bindService unbindService', url:'pages/services.html#boundservice' },
+  { section:'Services', title:'ForegroundService', desc:'startForeground notification channel foreground service persistent notification', url:'pages/services.html#foreground' },
+  { section:'Services', title:'CoroutineWorker / WorkManager', desc:'CoroutineWorker WorkManager OneTimeWorkRequest PeriodicWorkRequest constraints chain retry Result.success', url:'pages/services.html#workmanager' },
+  { section:'Services', title:'Hilt Worker', desc:'HiltWorker AssistedInject HiltWorkerFactory Configuration.Provider custom factory', url:'pages/services.html#hilt-worker' },
+  // Storage
+  { section:'Storage', title:'Kotlinx Serialization', desc:'@Serializable @SerialName Json decodeFromString encodeToString Retrofit converter', url:'pages/storage.html#serialization' },
+  { section:'Storage', title:'DataStore Preferences', desc:'DataStore preferencesDataStore PreferencesKeys booleanPreferencesKey edit Flow', url:'pages/storage.html#datastore' },
+  { section:'Storage', title:'Proto DataStore', desc:'Proto DataStore Protocol Buffers type-safe schema .proto file', url:'pages/storage.html#proto-datastore' },
+  { section:'Storage', title:'SharedPreferences', desc:'SharedPreferences getSharedPreferences edit putString getString commit apply', url:'pages/storage.html#sharedprefs' },
+  { section:'Storage', title:'Storage with/without Hilt', desc:'provide DataStore Hilt Module AppContainer singleton manual wiring', url:'pages/storage.html#storage-di' },
+  // Gradle
+  { section:'Gradle DSL', title:'App Configuration', desc:'compileSdk minSdk targetSdk versionCode versionName buildFeatures compose', url:'pages/gradle.html#app-config' },
+  { section:'Gradle DSL', title:'Build Types', desc:'debug release isMinifyEnabled isShrinkResources proguardFiles buildConfigField applicationIdSuffix signingConfig', url:'pages/gradle.html#build-types' },
+  { section:'Gradle DSL', title:'Product Flavors', desc:'flavorDimensions productFlavors staging production resValue applicationIdSuffix', url:'pages/gradle.html#flavors' },
+  { section:'Gradle DSL', title:'Version Catalog (TOML)', desc:'libs.versions.toml versions libraries plugins bundles alias Compose Hilt Room Retrofit Coil Koin DataStore WorkManager Serialization', url:'pages/gradle.html#version-catalog' },
+  // Patterns
+  { section:'Design Patterns', title:'MVVM', desc:'Model View ViewModel Repository StateFlow observe collect MutableStateFlow single source of truth', url:'pages/patterns.html#mvvm' },
+  { section:'Design Patterns', title:'MVI', desc:'Model View Intent sealed class Intent State Effect dispatch processIntent immutable reducer', url:'pages/patterns.html#mvi' },
+  { section:'Design Patterns', title:'MVVM vs MVI Comparison', desc:'comparison table when to use MVVM MVI complexity testability one-off events', url:'pages/patterns.html#comparison' },
+];
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function highlightMatch(text, q) {
+  const re = new RegExp(`(${escHtml(q)})`, 'gi');
+  return escHtml(text).replace(re, '<mark>$1</mark>');
+}
+
+const heroSearch = document.getElementById('heroSearch');
+const heroResults = document.getElementById('heroResults');
+
+heroSearch.addEventListener('input', () => {
+  const q = heroSearch.value.trim().toLowerCase();
+  if (q.length < 2) { heroResults.classList.remove('open'); return; }
+
+  const matches = SEARCH_INDEX.filter(item =>
+    item.title.toLowerCase().includes(q) ||
+    item.desc.toLowerCase().includes(q) ||
+    item.section.toLowerCase().includes(q)
+  ).slice(0, 20);
+
+  if (!matches.length) {
+    heroResults.innerHTML = `<div class="search-empty">No results for "<strong>${escHtml(q)}</strong>"</div>`;
+  } else {
+    heroResults.innerHTML = matches.map(r => `
+      <div class="hero-result" onclick="window.location='${r.url}'">
+        <div class="hr-section">${escHtml(r.section)}</div>
+        <div class="hr-title">${highlightMatch(r.title, q)}</div>
+        <div class="hr-snippet">${highlightMatch(r.desc.slice(0, 100), q)}</div>
+      </div>
+    `).join('');
+  }
+  heroResults.classList.add('open');
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.hero-search-wrap')) heroResults.classList.remove('open');
+});
+
+heroSearch.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { heroResults.classList.remove('open'); heroSearch.blur(); }
+  if (e.key === 'Enter') {
+    const first = heroResults.querySelector('.hero-result');
+    if (first) first.click();
+  }
+});
+</script>
+</body>
+</html>

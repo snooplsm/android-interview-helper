@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flow – Android Compose Guide</title>
+  <script>(function(){ document.documentElement.dataset.theme = localStorage.getItem('guide-theme') || 'light'; })();</script>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+</head>
+<body data-page="flow">
+<div id="nav-container"></div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-heading">Flow</div>
+    <a href="#stateflow">StateFlow &amp; SharedFlow</a>
+    <a href="#collect">collect &amp; collectLatest</a>
+    <a href="#launchin">launchIn</a>
+    <a href="#combine">combine &amp; zip</a>
+    <a href="#operators">Common Operators</a>
+    <a href="#statein">stateIn &amp; shareIn</a>
+  </aside>
+
+  <main class="content">
+    <div class="page-hero">
+      <h1>Flow</h1>
+      <p>Cold flows, hot flows, operators, and best practices for reactive streams in Android.</p>
+    </div>
+
+    <!-- STATEFLOW -->
+    <div class="subsection" id="stateflow">
+      <div class="sub-header">
+        <h2>StateFlow &amp; SharedFlow</h2>
+        <a class="doc-link" href="https://developer.android.com/kotlin/flow/stateflow-and-sharedflow" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc"><code>StateFlow</code> — hot flow with a current value, replays last value to new collectors. <code>SharedFlow</code> — hot flow, configurable replay, good for events.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-sf-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-sf-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>StateFlow vs LiveData:</strong> StateFlow is coroutine-native, works without a lifecycle owner, and is null-safe. LiveData is lifecycle-aware by default. In Compose, always prefer StateFlow.</p>
+            <p><strong>SharedFlow for events:</strong> Use <code>MutableSharedFlow()</code> (no replay) for one-shot UI events (navigate, show snackbar) to avoid re-delivering events after config change.</p>
+            <p><strong>Equality check:</strong> StateFlow uses structural equality — emitting the same value won't trigger collectors. Emit a copy or use SharedFlow if you need every event delivered.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- COLLECT -->
+    <div class="subsection" id="collect">
+      <div class="sub-header">
+        <h2>collect &amp; collectLatest</h2>
+        <a class="doc-link" href="https://developer.android.com/kotlin/flow" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc"><code>collect</code> processes every emission. <code>collectLatest</code> cancels the current block if a new value arrives before it finishes.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-collect-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-collect-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- LAUNCHIN -->
+    <div class="subsection" id="launchin">
+      <div class="sub-header">
+        <h2>launchIn</h2>
+        <a class="doc-link" href="https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/launch-in.html" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Terminal operator that launches a coroutine in a given scope to collect the flow. Equivalent to <code>scope.launch { flow.collect { } }</code>.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-li-q" class="language-kotlin"></code></pre>
+      </div>
+    </div>
+
+    <!-- COMBINE -->
+    <div class="subsection" id="combine">
+      <div class="sub-header">
+        <h2>combine &amp; zip</h2>
+        <a class="doc-link" href="https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/combine.html" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc"><code>combine</code> emits whenever <em>any</em> source updates (using latest from each). <code>zip</code> pairs emissions 1-to-1 and waits for both.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-combine-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-combine-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPERATORS -->
+    <div class="subsection" id="operators">
+      <div class="sub-header">
+        <h2>Common Operators</h2>
+        <a class="doc-link" href="https://developer.android.com/kotlin/flow#modify" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Transform, filter, flatten, and handle errors in flow pipelines.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-ops-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-ops-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATEIN -->
+    <div class="subsection" id="statein">
+      <div class="sub-header">
+        <h2>stateIn &amp; shareIn</h2>
+        <a class="doc-link" href="https://developer.android.com/kotlin/flow/stateflow-and-sharedflow#shareIn" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Convert a cold <code>Flow</code> into a hot <code>StateFlow</code> or <code>SharedFlow</code> so multiple collectors share a single upstream subscription.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-si-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-si-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>WhileSubscribed(5000):</strong> The 5-second timeout keeps the upstream alive briefly when there are no subscribers — survives config changes without restarting the flow. This is the recommended pattern for ViewModels.</p>
+            <p><strong>Eagerly vs Lazily:</strong> <code>Eagerly</code> starts immediately (always on). <code>Lazily</code> starts on first subscriber and never stops. <code>WhileSubscribed</code> starts/stops with subscribers.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const CODE = {
+'sf-q': `// StateFlow — always has a value
+private val _uiState = MutableStateFlow(UiState())
+val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+// Update
+_uiState.update { it.copy(isLoading = true) }
+
+// SharedFlow — events (no value, configurable replay)
+private val _events = MutableSharedFlow<UiEvent>()
+val events: SharedFlow<UiEvent> = _events.asSharedFlow()`,
+'sf-f': `// Full ViewModel example
+@HiltViewModel
+class UserViewModel @Inject constructor(private val repo: UserRepository) : ViewModel() {
+
+    private val _state = MutableStateFlow(UserState())
+    val state: StateFlow<UserState> = _state.asStateFlow()
+
+    private val _events = MutableSharedFlow<UiEvent>()
+    val events: SharedFlow<UiEvent> = _events.asSharedFlow()
+
+    fun loadUser(id: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            try {
+                val user = repo.getUser(id)
+                _state.update { it.copy(user = user, isLoading = false) }
+            } catch (e: Exception) {
+                _state.update { it.copy(isLoading = false) }
+                _events.emit(UiEvent.ShowError(e.message ?: "Unknown error"))
+            }
+        }
+    }
+}
+
+// Collect in Compose (lifecycle-aware)
+val state by viewModel.state.collectAsStateWithLifecycle()
+
+// Collect one-off events
+LaunchedEffect(Unit) {
+    viewModel.events.collect { event ->
+        when (event) {
+            is UiEvent.ShowError -> snackbar.showSnackbar(event.message)
+            is UiEvent.Navigate  -> navController.navigate(event.route)
+        }
+    }
+}`,
+
+'collect-q': `// Collect every value
+viewModelScope.launch {
+    repository.getData().collect { data ->
+        _state.update { it.copy(data = data) }
+    }
+}
+
+// collectLatest — cancels in-progress block when new value arrives
+viewModelScope.launch {
+    searchQuery.collectLatest { query ->
+        delay(300)              // debounce: cancelled if new query arrives
+        val results = search(query)
+        _state.update { it.copy(results = results) }
+    }
+}`,
+'collect-f': `// Safe collection with repeatOnLifecycle (Compose alternative)
+lifecycleScope.launch {
+    repeatOnLifecycle(Lifecycle.State.STARTED) {
+        viewModel.state.collect { state -> render(state) }
+    }
+}
+
+// collectAsState in Compose
+val state by viewModel.uiState.collectAsState()
+// collectAsStateWithLifecycle (preferred — stops when background)
+val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+// fold — accumulate values
+flow.collect { value -> runningTotal += value }`,
+
+'li-q': `// launchIn is shorthand for scope.launch { flow.collect { } }
+searchQuery
+    .debounce(300)
+    .distinctUntilChanged()
+    .flatMapLatest { query -> repository.search(query) }
+    .onEach { results -> _state.update { it.copy(results = results) } }
+    .catch { e -> _state.update { it.copy(error = e.message) } }
+    .launchIn(viewModelScope)`,
+
+'combine-q': `// combine — emits when ANY source updates
+val uiState = combine(userFlow, settingsFlow) { user, settings ->
+    UiState(user = user, theme = settings.theme)
+}
+
+// zip — pairs 1-to-1
+val paired = flowA.zip(flowB) { a, b -> Pair(a, b) }`,
+'combine-f': `// Typical ViewModel: combine multiple data streams
+val searchState = combine(
+    searchQueryFlow,
+    filtersFlow,
+    sortOrderFlow
+) { query, filters, sort ->
+    SearchState(query = query, filters = filters, sortOrder = sort)
+}.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SearchState())
+
+// combine 3+ flows
+combine(flow1, flow2, flow3, flow4) { a, b, c, d ->
+    // all four latest values
+    CombinedResult(a, b, c, d)
+}
+
+// merge — interleave multiple flows (no pairing)
+merge(flow1, flow2).collect { value -> handle(value) }`,
+
+'ops-q': `flow
+    .filter { it.isActive }           // keep only active items
+    .map { it.toDisplayModel() }      // transform
+    .take(10)                         // limit to 10 items
+    .distinctUntilChanged()           // skip duplicate emissions
+    .debounce(300)                    // wait for 300ms quiet period
+    .collect { render(it) }`,
+'ops-f': `// flatMapLatest — cancel previous, start new (search use case)
+searchQuery
+    .flatMapLatest { query ->
+        if (query.isEmpty()) flowOf(emptyList())
+        else repository.search(query)   // new Flow per query
+    }
+
+// flatMapConcat — sequential, waits for each inner flow
+// flatMapMerge  — concurrent, runs all at once (limit with concurrency param)
+
+// Error handling
+flow
+    .catch { e -> emit(fallbackValue) }  // emit default on error
+    .onStart { emit(loadingState) }       // emit before first upstream value
+    .onCompletion { cause -> log(cause) } // runs when flow ends/fails
+    .onEach { log("Emitting: $it") }      // side-effect without transform
+
+// Sorting with flow
+repository.getItems()
+    .map { list -> list.sortedBy { it.name } }
+    .collect { sorted -> _state.update { it.copy(items = sorted) } }
+
+// Sort by multiple fields
+.map { list -> list.sortedWith(compareBy({ it.category }, { it.name })) }
+
+// Dynamic sort order
+combine(itemsFlow, sortOrderFlow) { items, order ->
+    when (order) {
+        SortOrder.NAME -> items.sortedBy { it.name }
+        SortOrder.DATE -> items.sortedByDescending { it.createdAt }
+        SortOrder.PRICE -> items.sortedBy { it.price }
+    }
+}`,
+
+'si-q': `// Convert cold Flow -> StateFlow in ViewModel
+val items: StateFlow<List<Item>> = repository.getItems()
+    .stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = emptyList()
+    )`,
+'si-f': `// shareIn — multiple collectors share one upstream
+val sharedItems: SharedFlow<List<Item>> = repository.getItems()
+    .shareIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        replay = 1
+    )
+
+// SharingStarted options:
+// Eagerly            — starts immediately, never stops
+// Lazily             — starts on first subscriber, never stops
+// WhileSubscribed(N) — starts on first subscriber, stops N ms after last unsubscribes
+
+// Combine then stateIn (common ViewModel pattern)
+val uiState: StateFlow<UiState> = combine(
+    userFlow,
+    settingsFlow
+) { user, settings ->
+    UiState(user = user, isDark = settings.darkMode)
+}.stateIn(
+    scope = viewModelScope,
+    started = SharingStarted.WhileSubscribed(5_000),
+    initialValue = UiState()
+)`
+};
+
+initCode(CODE);
+</script>
+</body>
+</html>

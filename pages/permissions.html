@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Permissions – Android Compose Guide</title>
+  <script>(function(){ document.documentElement.dataset.theme = localStorage.getItem('guide-theme') || 'light'; })();</script>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+</head>
+<body data-page="permissions">
+<div id="nav-container"></div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-heading">Permissions</div>
+    <a href="#single">Single Permission</a>
+    <a href="#multiple">Multiple Permissions</a>
+    <a href="#rationale">After Denied / Rationale</a>
+    <a href="#settings">Settings Redirect</a>
+    <a href="#accompanist">Accompanist Permissions</a>
+  </aside>
+
+  <main class="content">
+    <div class="page-hero">
+      <h1>Permissions</h1>
+      <p>Runtime permission requests, rationale dialogs, and handling permanent denial.</p>
+    </div>
+
+    <div class="callout info"><strong>Remember:</strong> Dangerous permissions must be declared in the Manifest AND requested at runtime (API 23+). Normal permissions only need the Manifest declaration.</div>
+
+    <!-- SINGLE -->
+    <div class="subsection" id="single">
+      <div class="sub-header">
+        <h2>Single Permission</h2>
+        <a class="doc-link" href="https://developer.android.com/training/permissions/requesting" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Use <code>rememberLauncherForActivityResult</code> with <code>ActivityResultContracts.RequestPermission()</code>.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-single-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-single-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- MULTIPLE -->
+    <div class="subsection" id="multiple">
+      <div class="sub-header">
+        <h2>Multiple Permissions</h2>
+        <a class="doc-link" href="https://developer.android.com/training/permissions/requesting" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Use <code>RequestMultiplePermissions</code> — result is a <code>Map&lt;String, Boolean&gt;</code>.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-multi-q" class="language-kotlin"></code></pre>
+      </div>
+    </div>
+
+    <!-- RATIONALE -->
+    <div class="subsection" id="rationale">
+      <div class="sub-header">
+        <h2>After Denied / Rationale</h2>
+        <a class="doc-link" href="https://developer.android.com/training/permissions/requesting#explain" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">After a denial, check <code>shouldShowRequestPermissionRationale()</code> to decide whether to show an explanation or send the user to Settings.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-rationale-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-rationale-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+      <div class="callout tip"><strong>Interview tip:</strong> <code>shouldShowRationale</code> returns <code>true</code> only after the first denial. After "Don't ask again" it returns <code>false</code> — that's when you redirect to Settings.</div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="subsection" id="settings">
+      <div class="sub-header">
+        <h2>Settings Redirect</h2>
+      </div>
+      <p class="sub-desc">When a permission is permanently denied, deep-link the user to your app's system settings page.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns"><button class="btn-sm" onclick="copyCode(this)">Copy</button></div>
+        </div>
+        <pre><code id="code-settings-q" class="language-kotlin"></code></pre>
+      </div>
+    </div>
+
+    <!-- ACCOMPANIST -->
+    <div class="subsection" id="accompanist">
+      <div class="sub-header">
+        <h2>Accompanist Permissions</h2>
+        <a class="doc-link" href="https://google.github.io/accompanist/permissions/" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Wrapper library that provides <code>rememberPermissionState</code> and <code>rememberMultiplePermissionsState</code> for cleaner Compose integration.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-acc-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-acc-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const CODE = {
+'single-q': `@Composable
+fun CameraScreen() {
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) startCamera()
+        else showDeniedMessage()
+    }
+
+    Button(onClick = { launcher.launch(Manifest.permission.CAMERA) }) {
+        Text("Open Camera")
+    }
+}`,
+'single-f': `@Composable
+fun CameraScreen() {
+    val context = LocalContext.current
+    var permissionGranted by remember { mutableStateOf(
+        ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
+            PackageManager.PERMISSION_GRANTED
+    )}
+
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted -> permissionGranted = granted }
+
+    when {
+        permissionGranted -> CameraPreview()
+        else -> Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text("Camera permission needed")
+            Spacer(Modifier.height(12.dp))
+            Button(onClick = { launcher.launch(Manifest.permission.CAMERA) }) {
+                Text("Grant Permission")
+            }
+        }
+    }
+}`,
+
+'multi-q': `val multiLauncher = rememberLauncherForActivityResult(
+    ActivityResultContracts.RequestMultiplePermissions()
+) { permissions: Map<String, Boolean> ->
+    val cameraGranted = permissions[Manifest.permission.CAMERA] == true
+    val audioGranted  = permissions[Manifest.permission.RECORD_AUDIO] == true
+    if (cameraGranted && audioGranted) startVideoCall()
+}
+
+Button(onClick = {
+    multiLauncher.launch(arrayOf(
+        Manifest.permission.CAMERA,
+        Manifest.permission.RECORD_AUDIO
+    ))
+}) { Text("Start Video Call") }`,
+
+'rationale-q': `@Composable
+fun LocationScreen() {
+    val context = LocalContext.current
+    val activity = context as Activity
+    var showRationale by remember { mutableStateOf(false) }
+
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (!granted) {
+            val shouldShow = activity.shouldShowRequestPermissionRationale(
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+            showRationale = shouldShow
+            // if !shouldShow → permanently denied → show settings redirect
+        }
+    }`,
+'rationale-f': `// Full flow with rationale dialog + permanent denial handling
+@Composable
+fun LocationPermissionFlow() {
+    val context = LocalContext.current
+    val activity = context as Activity
+    var showRationale by remember { mutableStateOf(false) }
+    var permanentlyDenied by remember { mutableStateOf(false) }
+    var hasPermission by remember { mutableStateOf(
+        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED
+    )}
+
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        hasPermission = granted
+        if (!granted) {
+            val showRat = activity.shouldShowRequestPermissionRationale(
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+            if (showRat) showRationale = true
+            else permanentlyDenied = true   // "Don't ask again" was checked
+        }
+    }
+
+    when {
+        hasPermission -> MapContent()
+        showRationale -> AlertDialog(
+            onDismissRequest = { showRationale = false },
+            title = { Text("Location Required") },
+            text = { Text("We need your location to show nearby places.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showRationale = false
+                    launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                }) { Text("Allow") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRationale = false }) { Text("Cancel") }
+            }
+        )
+        permanentlyDenied -> SettingsRedirectContent(context)
+        else -> Button(onClick = { launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION) }) {
+            Text("Enable Location")
+        }
+    }
+}`,
+
+'settings-q': `fun openAppSettings(context: Context) {
+    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+        data = Uri.fromParts("package", context.packageName, null)
+    }
+    context.startActivity(intent)
+}
+
+// In Composable
+@Composable
+fun SettingsRedirectContent(context: Context) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("Permission permanently denied. Enable it in Settings.")
+        Spacer(Modifier.height(12.dp))
+        Button(onClick = { openAppSettings(context) }) {
+            Text("Open Settings")
+        }
+    }
+}`,
+
+'acc-q': `// Accompanist: rememberPermissionState
+val cameraState = rememberPermissionState(Manifest.permission.CAMERA)
+
+when {
+    cameraState.status.isGranted      -> CameraContent()
+    cameraState.status.shouldShowRationale -> RationaleDialog(
+        onConfirm = { cameraState.launchPermissionRequest() }
+    )
+    else -> Button(onClick = { cameraState.launchPermissionRequest() }) {
+        Text("Request Camera")
+    }
+}`,
+'acc-f': `// Multiple permissions with Accompanist
+val permissionsState = rememberMultiplePermissionsState(
+    permissions = listOf(
+        Manifest.permission.CAMERA,
+        Manifest.permission.RECORD_AUDIO,
+    )
+)
+
+when {
+    permissionsState.allPermissionsGranted -> VideoCallScreen()
+    permissionsState.shouldShowRationale   -> {
+        Column {
+            Text("Camera and Microphone are needed for video calls.")
+            Button(onClick = { permissionsState.launchMultiplePermissionRequest() }) {
+                Text("Grant Permissions")
+            }
+        }
+    }
+    else -> {
+        // Check which are denied
+        permissionsState.permissions.forEach { perm ->
+            if (!perm.status.isGranted) {
+                Text("\${perm.permission} denied")
+            }
+        }
+        Button(onClick = { permissionsState.launchMultiplePermissionRequest() }) {
+            Text("Request")
+        }
+    }
+}`
+};
+
+initCode(CODE);
+</script>
+</body>
+</html>

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DI / No DI – Android Compose Guide</title>
+  <script>(function(){ document.documentElement.dataset.theme = localStorage.getItem('guide-theme') || 'light'; })();</script>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+</head>
+<body data-page="di">
+<div id="nav-container"></div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-heading">Dependency Injection</div>
+    <a href="#hilt">Hilt</a>
+    <a href="#dagger">Dagger</a>
+    <a href="#koin">Koin</a>
+    <a href="#no-di">No DI</a>
+  </aside>
+
+  <main class="content">
+    <div class="page-hero">
+      <h1>DI / No DI</h1>
+      <p>Hilt, Dagger, Koin, and manual dependency wiring — know when to use each.</p>
+    </div>
+
+    <!-- COMPARISON TABLE -->
+    <div class="table-wrap" style="margin-bottom:32px">
+      <table>
+        <thead><tr><th>Framework</th><th>Compile-time safe</th><th>Android-first</th><th>Setup</th><th>Best for</th></tr></thead>
+        <tbody>
+          <tr><td>Hilt</td><td>✅ Yes</td><td>✅ Built for Android</td><td>Medium</td><td>Most Android apps</td></tr>
+          <tr><td>Dagger</td><td>✅ Yes</td><td>Needs boilerplate</td><td>High</td><td>Large/library projects</td></tr>
+          <tr><td>Koin</td><td>❌ Runtime</td><td>✅ Multiplatform</td><td>Low</td><td>KMM, rapid prototyping</td></tr>
+          <tr><td>No DI</td><td>N/A</td><td>N/A</td><td>None</td><td>Simple apps, interviews</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- HILT -->
+    <div class="subsection" id="hilt">
+      <div class="sub-header">
+        <h2>Hilt</h2>
+        <a class="doc-link" href="https://developer.android.com/training/dependency-injection/hilt-android" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Google's recommended DI library. Built on Dagger, but removes most boilerplate with annotations. Compile-time safe.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-hilt-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-hilt-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>Components &amp; Scopes:</strong></p>
+            <ul>
+              <li><code>@Singleton</code> / <code>SingletonComponent</code> — App lifetime</li>
+              <li><code>@ActivityScoped</code> / <code>ActivityComponent</code> — Activity lifetime</li>
+              <li><code>@ViewModelScoped</code> / <code>ViewModelComponent</code> — ViewModel lifetime</li>
+              <li><code>@FragmentScoped</code> / <code>FragmentComponent</code> — Fragment lifetime</li>
+            </ul>
+            <p><strong>@Binds vs @Provides:</strong> Use <code>@Binds</code> (abstract) to bind an interface to its implementation — more efficient than <code>@Provides</code> since it generates less code. Use <code>@Provides</code> when you need to call a constructor or third-party code.</p>
+            <p><strong>@Qualifier:</strong> Use when you need to provide two instances of the same type (e.g., two different OkHttpClients).</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- DAGGER -->
+    <div class="subsection" id="dagger">
+      <div class="sub-header">
+        <h2>Dagger</h2>
+        <a class="doc-link" href="https://dagger.dev/dev-guide/android" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Compile-time DI via annotation processing. More boilerplate than Hilt but gives full control. Hilt is built on Dagger.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-dagger-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-dagger-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- KOIN -->
+    <div class="subsection" id="koin">
+      <div class="sub-header">
+        <h2>Koin</h2>
+        <a class="doc-link" href="https://insert-koin.io/docs/quickstart/android" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Kotlin-native, DSL-based DI. Runtime resolution (not compile-time). Simpler setup, great for Kotlin Multiplatform.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-koin-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-koin-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- NO DI -->
+    <div class="subsection" id="no-di">
+      <div class="sub-header">
+        <h2>No DI</h2>
+      </div>
+      <p class="sub-desc">For simple apps or when learning — manual wiring via singletons, service locator, or an app-level container. Good to know for interviews.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-nodi-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-nodi-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>Service Locator vs DI:</strong> Service Locator is an anti-pattern in some views — dependencies are hidden (class pulls them), whereas DI makes them explicit (class receives them). Testability suffers with Service Locator since you must configure the locator in tests.</p>
+            <p><strong>When no DI is fine:</strong> Simple apps with few screens, prototypes, or when you want zero framework overhead. The AppContainer pattern is a clean middle ground.</p>
+            <p><strong>Interview answer:</strong> Mention that even without a DI framework you can still practice the dependency inversion principle by passing dependencies through constructors.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const CODE = {
+'hilt-q': `// 1. Annotate Application
+@HiltAndroidApp
+class MyApp : Application()
+
+// 2. Provide dependencies in a Module
+@Module
+@InstallIn(SingletonComponent::class)
+object NetworkModule {
+    @Provides @Singleton
+    fun provideRetrofit(): Retrofit = Retrofit.Builder().baseUrl(BASE_URL).build()
+
+    @Provides @Singleton
+    fun provideApi(retrofit: Retrofit): ApiService = retrofit.create(ApiService::class.java)
+}`,
+'hilt-f': `// @Binds — more efficient than @Provides for interface binding
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class RepositoryModule {
+    @Binds
+    abstract fun bindUserRepository(impl: UserRepositoryImpl): UserRepository
+}
+
+// @Qualifier — distinguish two instances of the same type
+@Qualifier @Retention(AnnotationRetention.BINARY)
+annotation class AuthInterceptorOkHttp
+
+@Qualifier @Retention(AnnotationRetention.BINARY)
+annotation class LoggingOkHttp
+
+@Module @InstallIn(SingletonComponent::class)
+object HttpModule {
+    @Provides @Singleton @AuthInterceptorOkHttp
+    fun provideAuthOkHttp(): OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(AuthInterceptor()).build()
+
+    @Provides @Singleton @LoggingOkHttp
+    fun provideLoggingOkHttp(): OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(HttpLoggingInterceptor()).build()
+}
+
+// Inject into Activity/Fragment
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
+    @Inject lateinit var analytics: AnalyticsService
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent { AppTheme { MainScreen() } }
+    }
+}
+
+// Inject into non-Android class via constructor
+class UserRepository @Inject constructor(
+    private val api: ApiService,
+    private val db: UserDao
+) {
+    suspend fun getUser(id: String) = db.get(id) ?: api.fetchUser(id)
+}
+
+// ViewModel
+@HiltViewModel
+class UserViewModel @Inject constructor(private val repo: UserRepository) : ViewModel()
+
+// Compose
+val vm: UserViewModel = hiltViewModel()`,
+
+'dagger-q': `// Component — the injector
+@Singleton
+@Component(modules = [AppModule::class, NetworkModule::class])
+interface AppComponent {
+    fun inject(activity: MainActivity)
+    fun userRepository(): UserRepository
+    fun viewModelFactory(): ViewModelProvider.Factory
+}`,
+'dagger-f': `// Module
+@Module
+class AppModule(private val context: Context) {
+    @Provides @Singleton
+    fun provideContext(): Context = context
+
+    @Provides @Singleton
+    fun provideDatabase(context: Context): AppDatabase =
+        Room.databaseBuilder(context, AppDatabase::class.java, "app.db").build()
+}
+
+// Build component in Application
+class MyApp : Application() {
+    val appComponent: AppComponent by lazy {
+        DaggerAppComponent.builder()
+            .appModule(AppModule(this))
+            .build()
+    }
+}
+
+// Inject in Activity
+class MainActivity : AppCompatActivity() {
+    @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        (application as MyApp).appComponent.inject(this)
+        super.onCreate(savedInstanceState)
+    }
+}
+
+// Subcomponents for narrower scopes
+@ActivityScope
+@Subcomponent(modules = [ActivityModule::class])
+interface ActivityComponent {
+    fun inject(activity: DetailActivity)
+
+    @Subcomponent.Factory
+    interface Factory { fun create(): ActivityComponent }
+}`,
+
+'koin-q': `// Define modules
+val appModule = module {
+    single<UserRepository> { UserRepositoryImpl(get()) }  // singleton
+    factory { UseCase(get()) }                             // new instance each time
+    viewModel { UserViewModel(get()) }                     // ViewModel-scoped
+}`,
+'koin-f': `// Multiple modules
+val networkModule = module {
+    single { provideRetrofit() }
+    single { get<Retrofit>().create(ApiService::class.java) }
+}
+
+val dbModule = module {
+    single { Room.databaseBuilder(androidContext(), AppDatabase::class.java, "db").build() }
+    single { get<AppDatabase>().userDao() }
+}
+
+// Start Koin in Application
+class MyApp : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        startKoin {
+            androidLogger(Level.DEBUG)
+            androidContext(this@MyApp)
+            modules(appModule, networkModule, dbModule)
+        }
+    }
+}
+
+// Inject in Activity/Fragment
+class MainActivity : AppCompatActivity() {
+    private val viewModel: UserViewModel by viewModel()  // lazy injection
+    private val repo: UserRepository by inject()
+}
+
+// In Composable
+@Composable
+fun UserScreen() {
+    val vm: UserViewModel = koinViewModel()
+    val state by vm.state.collectAsStateWithLifecycle()
+}
+
+// Named instances
+single<OkHttpClient>(named("auth"))   { buildAuthClient() }
+single<OkHttpClient>(named("logging")) { buildLoggingClient() }
+val client: OkHttpClient by inject(named("auth"))`,
+
+'nodi-q': `// App-level container (preferred manual approach)
+class AppContainer(context: Context) {
+    val database = Room.databaseBuilder(context, AppDatabase::class.java, "db").build()
+    val api: ApiService = Retrofit.Builder().baseUrl(BASE_URL).build().create(ApiService::class.java)
+    val userRepository: UserRepository = UserRepositoryImpl(api, database.userDao())
+}
+
+class MyApp : Application() {
+    val container by lazy { AppContainer(this) }
+}`,
+'nodi-f': `// Access container from Activity
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val container = (application as MyApp).container
+        setContent {
+            val vm: UserViewModel = viewModel(
+                factory = UserViewModelFactory(container.userRepository)
+            )
+            AppTheme { UserScreen(vm) }
+        }
+    }
+}
+
+// Service Locator pattern
+object ServiceLocator {
+    private var repo: UserRepository? = null
+
+    fun provideUserRepository(context: Context): UserRepository {
+        return repo ?: synchronized(this) {
+            UserRepositoryImpl(
+                api = retrofitInstance.create(ApiService::class.java),
+                dao = getDatabase(context).userDao()
+            ).also { repo = it }
+        }
+    }
+
+    // For tests — swap with a fake
+    fun setTestRepository(testRepo: UserRepository) { repo = testRepo }
+}
+
+// Singleton object (simplest, least testable)
+object Analytics {
+    fun logEvent(name: String) { /* … */ }
+}
+
+// Constructor injection without framework (most testable)
+class UserViewModel(private val repo: UserRepository) : ViewModel()
+// → Pass repo explicitly from Activity/Fragment`
+};
+
+initCode(CODE);
+</script>
+</body>
+</html>

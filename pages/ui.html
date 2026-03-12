@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UI – Android Compose Guide</title>
+  <script>(function(){ document.documentElement.dataset.theme = localStorage.getItem('guide-theme') || 'light'; })();</script>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+</head>
+<body data-page="ui">
+<div id="nav-container"></div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-heading">UI Components</div>
+    <a href="#row">Row</a>
+    <a href="#box">Box</a>
+    <a href="#column">Column</a>
+    <a href="#lazy">Lazy Layouts</a>
+    <a href="#pagers">Pagers</a>
+    <a href="#image">Image</a>
+    <a href="#icons">Icons</a>
+    <a href="#text">Text</a>
+    <a href="#shapes">Shapes / RoundRect</a>
+    <a href="#constraintlayout">ConstraintLayout</a>
+    <a href="#textfield">TextField / TextArea</a>
+    <a href="#textfield-style">Styling TextField</a>
+    <a href="#keyboard">Keyboard / IME</a>
+    <a href="#animations">Animations</a>
+    <div class="sidebar-heading" style="margin-top:10px">State &amp; Effects</div>
+    <a href="#remember">remember</a>
+    <a href="#mutablestate">mutableStateOf</a>
+    <a href="#derivedstate">derivedStateOf</a>
+    <a href="#launchedeffect">LaunchedEffect</a>
+    <a href="#sideeffect">SideEffect</a>
+    <a href="#disposableeffect">DisposableEffect</a>
+  </aside>
+
+  <main class="content">
+    <div class="page-hero">
+      <h1>UI — Jetpack Compose</h1>
+      <p>Layouts, composables, and state management building blocks.</p>
+    </div>
+
+    <!-- ROW -->
+    <div class="subsection" id="row">
+      <div class="sub-header">
+        <h2>Row</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/layouts/basics" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Places children horizontally. Use <code>horizontalArrangement</code> to space them and <code>verticalAlignment</code> to align on the cross axis. Use <code>Modifier.weight()</code> to distribute remaining space proportionally — just like <code>layout_weight</code> in LinearLayout.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-row-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-row-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>Arrangement options:</strong> <code>Start</code>, <code>End</code>, <code>Center</code>, <code>SpaceBetween</code>, <code>SpaceAround</code>, <code>SpaceEvenly</code>, <code>spacedBy(dp)</code>.</p>
+            <p><strong>RowScope:</strong> The <code>content</code> lambda of <code>Row</code> has a <code>RowScope</code> receiver. This unlocks scope-specific modifiers only available inside a Row:</p>
+            <ul>
+              <li><code>Modifier.weight(fraction)</code> — proportional width share of remaining space</li>
+              <li><code>Modifier.align(Alignment.Vertical)</code> — override per-child vertical alignment (e.g. <code>Alignment.Top</code>, <code>CenterVertically</code>, <code>Bottom</code>)</li>
+              <li><code>Modifier.alignBy(baseline)</code> — align children by their first text baseline</li>
+            </ul>
+            <p>These modifiers only compile inside a <code>Row { }</code> block — using them outside causes a compile error, which is the entire point of scope-based APIs.</p>
+            <p><strong>Interview tip:</strong> If asked how to push one item to the end of a Row, use <code>Modifier.weight(1f)</code> on a Spacer between the leading and trailing items, or use <code>Arrangement.SpaceBetween</code>.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- BOX -->
+    <div class="subsection" id="box">
+      <div class="sub-header">
+        <h2>Box</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/layouts/basics" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Stacks children on top of each other (like FrameLayout). Use <code>contentAlignment</code> for default child alignment, or <code>Modifier.align()</code> per-child.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-box-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-box-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>Common pattern:</strong> Overlaying a loading indicator or badge on top of content.</p>
+            <p><strong>z-order:</strong> Later children draw on top. Use <code>Modifier.zIndex()</code> if you need to override draw order.</p>
+            <p><strong>BoxWithConstraints:</strong> When you need to know the available size at composition time, use <code>BoxWithConstraints</code> to access <code>maxWidth</code> / <code>maxHeight</code>.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- COLUMN -->
+    <div class="subsection" id="column">
+      <div class="sub-header">
+        <h2>Column</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/layouts/basics" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Places children vertically. Mirror of Row — same arrangement/alignment API but on the vertical axis. <code>Modifier.weight()</code> distributes height proportionally among weighted children.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-col-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-col-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>ColumnScope:</strong> The <code>content</code> lambda of <code>Column</code> has a <code>ColumnScope</code> receiver. This unlocks scope-specific modifiers only available inside a Column:</p>
+            <ul>
+              <li><code>Modifier.weight(fraction, fill)</code> — proportional height share of remaining vertical space</li>
+              <li><code>Modifier.align(Alignment.Horizontal)</code> — override per-child horizontal alignment (e.g. <code>Alignment.Start</code>, <code>Alignment.CenterHorizontally</code>, <code>Alignment.End</code>)</li>
+              <li><code>Modifier.alignBy(alignmentLine)</code> — align children by a custom <code>HorizontalAlignmentLine</code></li>
+            </ul>
+            <p>These modifiers only compile inside a <code>Column { }</code> block — using them outside causes a compile error, giving you build-time safety instead of a runtime crash.</p>
+            <p><strong>weight(fill = true vs false):</strong> By default <code>weight(1f)</code> tells the child to fill its share. Set <code>fill = false</code> to let the child be smaller than its share (useful for centering within an allocated slot).</p>
+            <p><strong>Mixed weighted + fixed sizes:</strong> Fixed-size children are measured first. Remaining space is split among weighted children proportionally. This is how you build a scrollable body with a pinned footer.</p>
+            <p><strong>Column with scrollable top + pinned bottom:</strong> Give the scrollable area <code>weight(1f)</code> so the pinned footer always sticks to the bottom regardless of content height.</p>
+            <p><strong>align() vs horizontalAlignment:</strong> <code>Column(horizontalAlignment = Alignment.CenterHorizontally)</code> sets the default for all children. <code>Modifier.align()</code> overrides it for one specific child.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- LAZY -->
+    <div class="subsection" id="lazy">
+      <div class="sub-header">
+        <h2>Lazy Layouts</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/lists" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc"><code>LazyColumn</code> (vertical list), <code>LazyRow</code> (horizontal list), <code>LazyVerticalGrid</code> — only compose and draw visible items.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-lazy-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-lazy-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>keys:</strong> Always provide stable keys with <code>items(list, key = { it.id })</code>. This lets Compose avoid recomposing unchanged items during list updates and preserves scroll position.</p>
+            <p><strong>contentType:</strong> When a list has heterogeneous item types, set <code>contentType = { it::class }</code> so Compose can reuse composition nodes efficiently.</p>
+            <p><strong>LazyListState:</strong> Use <code>rememberLazyListState()</code> to programmatically scroll, detect first visible item, or check if scrolled.</p>
+            <div class="code-card">
+              <div class="code-card-header"><span class="code-lang">Kotlin</span><div class="code-btns"><button class="btn-sm" onclick="copyCode(this)">Copy</button></div></div>
+              <pre><code id="code-lazy-extra" class="language-kotlin"></code></pre>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- PAGERS -->
+    <div class="subsection" id="pagers">
+      <div class="sub-header">
+        <h2>Pagers</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/layouts/pager" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc"><code>HorizontalPager</code> / <code>VerticalPager</code> from <code>androidx.compose.foundation</code>. Pair with <code>TabRow</code> for tab+pager UI.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-pager-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-pager-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- IMAGE -->
+    <div class="subsection" id="image">
+      <div class="sub-header">
+        <h2>Image</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/graphics/images/loading" target="_blank">📖 Docs</a>
+        <a class="doc-link" href="https://fonts.google.com/icons" target="_blank">🎨 Icon Library</a>
+      </div>
+      <p class="sub-desc">Compose has three image sources: resource painters, vector drawables, and Material icons. For network images use Coil's <code>AsyncImage</code>.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-img-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-img-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>ContentScale options:</strong> <code>Crop</code>, <code>Fit</code>, <code>FillBounds</code>, <code>FillWidth</code>, <code>FillHeight</code>, <code>Inside</code>, <code>None</code>.</p>
+            <p><strong>Icons.Default vs Icons.Outlined vs Icons.Filled:</strong> All come from <code>material-icons-extended</code>. Default = Filled. Always set <code>contentDescription</code> for accessibility.</p>
+            <p><strong>Coil transforms:</strong> Use <code>model = ImageRequest.Builder(context).data(url).crossfade(true).build()</code> for fade-in and other transforms.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- ICONS -->
+    <div class="subsection" id="icons">
+      <div class="sub-header">
+        <h2>Icons</h2>
+        <a class="doc-link" href="https://developer.android.com/reference/kotlin/androidx/compose/material/icons/Icons" target="_blank">📖 Docs</a>
+        <a class="doc-link" href="https://fonts.google.com/icons" target="_blank">🎨 Browse All</a>
+      </div>
+      <p class="sub-desc">Material icons ship in two artifacts: <code>material-icons-core</code> (a small essential set) and <code>material-icons-extended</code> (1 000+ icons). Access via <code>Icons.Default.*</code> (= Filled), <code>Icons.Outlined.*</code>, <code>Icons.Rounded.*</code>, <code>Icons.Sharp.*</code>, or <code>Icons.TwoTone.*</code>.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-icons-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-icons-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>Dependency:</strong> Add <code>implementation("androidx.compose.material:material-icons-extended")</code> for all 1 000+ icons. The core artifact only ships ~150 essentials.</p>
+            <p><strong>contentDescription:</strong> Always provide one for interactive icons (buttons). Pass <code>null</code> for purely decorative icons so TalkBack skips them.</p>
+            <p><strong>Tinting:</strong> <code>Icon</code> applies <code>LocalContentColor.current</code> by default. Override with the <code>tint</code> parameter.</p>
+            <p><strong>Icon size:</strong> Default is <code>24.dp</code>. Use <code>Modifier.size()</code> to change it.</p>
+          </div>
+        </details>
+      </div>
+
+      <!-- Icon name reference grid -->
+      <div style="margin-top:16px">
+        <p style="font-weight:600;margin-bottom:8px">Available Icon Names (use with <code>Icons.Default.*</code>)</p>
+
+        <p style="font-size:0.8rem;color:var(--on-surface-variant);margin-bottom:12px">Listed by category. All names work with every style variant (Default/Outlined/Rounded/Sharp/TwoTone) unless noted as extended-only (†).</p>
+
+        <div class="icon-category"><strong>Navigation &amp; Arrows</strong><br>
+          ArrowBack · ArrowForward · ArrowUpward · ArrowDownward · ArrowDropDown · ArrowDropUp ·
+          ArrowLeft · ArrowRight · ChevronLeft · ChevronRight · ExpandLess · ExpandMore ·
+          FirstPage · LastPage · Menu · MoreVert · MoreHoriz · Subdirectory · UnfoldLess · UnfoldMore
+        </div>
+
+        <div class="icon-category"><strong>Action</strong><br>
+          Add · AddCircle · AddCircleOutline · Alarm · AlarmAdd · AlarmOff · AlarmOn ·
+          Android · Announcement · Aspect Ratio · Assessment · Assignment · AssignmentInd ·
+          AssignmentLate · AssignmentReturn · AssignmentReturned · AssignmentTurnedIn ·
+          AutoFixHigh† · AutoFixNormal† · AutoFixOff† · Backup · BookmarkAdd† · BookmarkAdded† ·
+          BookmarkRemove† · Build · CalendarToday · Camera · CardGiftcard · CardMembership ·
+          CardTravel · ChangeHistory · CheckCircle · CheckCircleOutline · ChromeReaderMode ·
+          Class · Code · CommentBank† · Commute† · ContactPage† · ContactSupport ·
+          CopyAll† · Copyright · CreditCard · Dashboard · DataExploration† · DateRange ·
+          Delete · DeleteForever · DeleteOutline · Description · Dns · Done · DoneAll ·
+          DoneOutline · DoNotDisturb · DoNotDisturbAlt · DoNotDisturbOff · DoNotDisturbOn ·
+          Download · DriveFileMove† · DriveFileRenameOutline† · Edit · EditCalendar† ·
+          Event · EventAvailable · EventBusy · EventNote · EventSeat · ExitToApp ·
+          Explore · ExploreOff† · Extension · Face · FaceRetouching† · Favorite ·
+          FavoriteBorder · Feedback · FileDownload · FileDownloadDone† · FileUpload ·
+          Filter · FindInPage · FindReplace · Fingerprint · FlightLand · FlightTakeoff ·
+          Flip · Forward10 · Forward30 · Forward5 · Fullscreen · FullscreenExit ·
+          GetApp · GifBox† · Grade · Group · GroupAdd · GroupRemove† · GroupWork ·
+          Help · HelpCenter† · HelpOutline · Highlight · History · HistoryToggleOff† ·
+          Home · HomeRepairService† · Http · Https · Input · InstallDesktop† ·
+          IntegrationInstructions† · Inventory† · Inventory2† · InvertColors · InvertColorsOff ·
+          Launch · Label · LabelImportant · LabelOff · Language · LeakAdd · LeakRemove ·
+          List · Lock · LockOpen · Login† · Logout† · Loyalty · ManageAccounts† ·
+          ManageSearch† · Map · MaximizeOutlined · MedicalServices† · MiscellaneousServices† ·
+          ModelTraining† · MonitorWeight† · MoreTime† · NaturePeople · NewLabel† · NextPlan† ·
+          NightShelter† · NoAccounts† · NotStarted† · Note · NoteAdd · NotificationAdd† ·
+          Notifications · NotificationsActive · NotificationsNone · NotificationsOff ·
+          NotificationsPaused · OfflineBolt · OfflinePin · OnDeviceTraining† ·
+          OpenInBrowser · OpenInFull† · OpenInNew · OpenWith ·
+          Outbond† · Outbox† · OutputOutlined† · PageView · Paid† · Pending ·
+          PendingActions† · PermCameraMic · PermContactCalendar · PermDataSetting ·
+          PermDeviceInformation · PermIdentity · PermMedia · PermPhoneMsg · PermScanWifi ·
+          Pets · PictureInPicture · PictureInPictureAlt · Pin† · PlayForWork ·
+          Policy† · Poll · Power · PowerOff · PowerSettingsNew · Preview† ·
+          Print · PrintDisabled† · PrivacyTip† · ProductionQuantityLimits† ·
+          QueryBuilder · QueryStats† · QuestionAnswer · QuestionMark† · QueueMusic†  ·
+          Receipt · ReceiptLong† · Recommend† · Redeem · Remove · RemoveShoppingCart ·
+          ReOrder · Report · ReportGmailerrorred† · ReportOff† · ReportProblem ·
+          RequestPage† · ResetTv† · RestoreFromTrash† · RestorePage · RocketLaunch† ·
+          Room · RoomPreferences† · RoomService† · RuleFolder† · RuleFolderOutlined† ·
+          RunningWithErrors† · Schedule · ScheduleSend† · Search · SearchOff† ·
+          Security · SecurityUpdate† · SecurityUpdateGood† · SecurityUpdateWarning† ·
+          Segment† · SelectAll · Send · SendAndArchive† · Settings ·
+          SettingsAccessibility† · SettingsApplications · SettingsBackupRestore ·
+          SettingsBluetooth · SettingsBrightness · SettingsCell · SettingsEthernet ·
+          SettingsInputAntenna · SettingsInputComponent · SettingsInputComposite ·
+          SettingsInputHdmi · SettingsInputSvideo · SettingsOverscan ·
+          SettingsPhone · SettingsPower · SettingsRemote · SettingsSuggest† ·
+          SettingsSystemDaydream · SettingsVoice · ShoppingBag† · ShoppingBasket ·
+          ShoppingCart · SmartButton† · SmartToy† · Source† · Spellcheck · SpeakerNotes ·
+          SpeakerNotesOff · Splitscreen† · Star · StarBorder · StarHalf ·
+          StarOutline† · StarRate† · Stars · StickyNote2† · StoreMallDirectory ·
+          Subject · Subtitles · SubtitlesOff† · SupervisedUserCircle · SupervisorAccount ·
+          Support† · SupportAgent† · SwapHoriz · SwapHorizontalCircle† ·
+          SwapVert · SwapVerticalCircle · Sync · SyncAlt† · SyncDisabled · SyncLock† ·
+          SyncProblem · SystemUpdate · SystemUpdateAlt · Tab · TabUnselected ·
+          TableChart · TableRows† · TableView† · TextRotateUp · TextRotateVertical ·
+          TextRotationAngledown† · TextRotationAngleup† · TextRotationDown · TextRotationNone ·
+          ThreeDRotation · ThumbDown · ThumbDownAlt† · ThumbDownOffAlt† ·
+          ThumbUp · ThumbUpAlt† · ThumbUpOffAlt† · Timeline · Today ·
+          Token† · TouchApp · Tour† · TravelExplore† · TrendingDown · TrendingFlat · TrendingUp ·
+          TryOutlined† · TurnedIn · TurnedInNot · Unpublished† · Update · UpdateDisabled† ·
+          Upgrade† · Verified† · VerifiedUser · VideoLabel · ViewAgenda · ViewArray ·
+          ViewCarousel · ViewColumn · ViewComfy† · ViewComfyAlt† · ViewCompact† ·
+          ViewCompactAlt† · ViewCozy† · ViewDay · ViewHeadline · ViewInAr† · ViewKanban† ·
+          ViewList · ViewModule · ViewQuilt · ViewSidebar† · ViewStream · ViewTimeline† ·
+          ViewWeek · Visibility · VisibilityOff · Voicemail · VoiceOverOff ·
+          Watch · Widgets · Wifi · WifiOff · Work · WorkOff† · WorkOutline†
+        </div>
+
+        <div class="icon-category"><strong>Alert</strong><br>
+          AddAlert · Error · ErrorOutline · NotificationImportant · Warning · WarningAmber†
+        </div>
+
+        <div class="icon-category"><strong>Audio / Video &amp; Media</strong><br>
+          Album · ArtTrack · AudioFile† · Audiotrack · Av1Supported† · AvTimer ·
+          BrandingWatermark · CallToAction · ClosedCaption · ClosedCaptionDisabled† ·
+          ClosedCaptionOff · Equalizer · ExplicitContent† · FastForward · FastRewind ·
+          FeaturedPlayList · FeaturedVideo · FiberDvr · FiberManualRecord ·
+          FiberNew · FiberPin · FiberSmartRecord · ForwardMedia† · Games ·
+          HighQuality · InterpreterMode† · LibraryAdd · LibraryAddCheck† ·
+          LibraryBooks · LibraryMusic · Loop · Mic · MicNone · MicOff ·
+          Movie · MovieCreation · MovieFilter · MusicNote · MusicOff · MusicVideo ·
+          NewReleases · NotInterested · NoteAlt† · Note · NoteAdd ·
+          PauseCircle · PauseCircleFilled · PauseCircleOutline · Pause ·
+          PlayArrow · PlayCircle · PlayCircleFilled · PlayCircleOutline ·
+          PlayDisabled† · PlayLesson† · Playlist · PlaylistAdd · PlaylistAddCheck ·
+          PlaylistAddCheckCircle† · PlaylistAddCircle† · PlaylistPlay · PlaylistRemove† ·
+          PodcastsOutlined† · Queue · QueueMusic · QueuePlayNext ·
+          Radio · RadioButtonChecked · RadioButtonUnchecked ·
+          RecentActors · Repeat · RepeatOn† · RepeatOne · RepeatOneOn† ·
+          Replay · Replay10 · Replay30 · Replay5 · ReplayCircleFilled† ·
+          Shuffle · ShuffleOn† · SkipNext · SkipPrevious · SlowMotionVideo ·
+          Snooze · SortByAlpha · Speed · Stop · StopCircle† · Subtitles ·
+          SurroundSound · VideoCall · VideoFile† · VideoLabel · VideoLibrary ·
+          VideoSettings† · Videocam · VideocamOff · VideoStable† ·
+          VolumeDown · VolumeMute · VolumeOff · VolumeUp · Web ·
+          WebAsset · WebAssetOff† · WebStories†
+        </div>
+
+        <div class="icon-category"><strong>Communication</strong><br>
+          AlternateEmail · Business · Call · CallEnd · CallMade · CallMerge ·
+          CallMissed · CallMissedOutgoing · CallReceived · CallSplit ·
+          CancelPresentation · CellWifi† · Chat · ChatBubble · ChatBubbleOutline ·
+          ClearAll · Comment · ContactMail · ContactPhone ·
+          Contacts · DialerSip · Dialer · DocumentScanner† · Domain† · DomainAdd† ·
+          DomainDisabled · DomainVerification† · Duo† · Email · Forum ·
+          Hub† · Inbox · ImportContacts · ImportExport · InvertColorsOff ·
+          ListAlt · LiveHelp · LocationOff · LocationOn ·
+          Mail · MailLock† · MailOutline · MarkAsUnread† ·
+          MarkChatRead† · MarkChatUnread† · MarkEmailRead† · MarkEmailUnread† ·
+          MarkUnreadChatAlt† · Message · MobileFriendly · MobileOff ·
+          NearbyError† · NearbyOff† · NoSim · Phone ·
+          PhoneAndroid · PhoneCallback · PhoneDisabled† · PhoneEnabled† ·
+          PhoneForwarded · PhoneInTalk · PhoneIphone · PhoneLocked · PhoneMissed ·
+          PhonePaused · Phonelink · PhonelinkErase · PhonelinkLock · PhonelinkOff ·
+          PhonelinkRing · PhonelinkSetup · PortableWifiOff · PresentToAll ·
+          PrintDisabled · QrCode† · QrCode2† · QrCodeScanner† ·
+          ReadMore† · RingVolume · Rss · RssFeed · ScreenShare ·
+          SentimentSatisfied · SentimentVeryDissatisfied · SimCard ·
+          SimCardAlert · SimCardDownload† · Sip† · Sms · SmsFailed ·
+          SpeakerPhone · Spoke† · StayCurrentLandscape · StayCurrentPortrait ·
+          StayPrimaryLandscape · StayPrimaryPortrait · StopScreenShare ·
+          Swap · Textsms · Unsubscribe† · Voicemail · VpnKey · VpnKeyOff† ·
+          VpnLock · Wifi · WifiCalling† · WifiCalling3† · WifiChannel† · WifiFind† ·
+          WifiLock · WifiOff · WifiPassword† · WifiProtectedSetup† · WifiTethering ·
+          WifiTetheringError† · WifiTetheringOff†
+        </div>
+
+        <div class="icon-category"><strong>Content</strong><br>
+          Add · AddBox · AddCircle · AddCircleOutline · AddLink† · Archive ·
+          BackSpace · Block · Bold† · Calculate† · Clear · ContentCopy ·
+          ContentCut · ContentPaste · ContentPasteGo† · ContentPasteOff† ·
+          ContentPasteSearch† · Create · DeleteSweep · Deselect† ·
+          Drafts · FileCopy · Filter · FilterList · FilterListOff† ·
+          Flag · FlagCircle† · FontDownload · FontDownloadOff† ·
+          Forward · ForwardToInbox† · Gesture · HowToReg · HowToVote ·
+          Inbox · Italic† · Link · LinkOff · LowPriority ·
+          Mail · MarkdownOutlined† · MoveToInbox · NextWeek ·
+          Outlined · Remove · RemoveCircle · RemoveCircleOutline ·
+          Reply · ReplyAll · Report · ReportOff† · Save ·
+          SaveAlt · SaveAs† · SelectAll · Send · Shield† ·
+          ShieldMoon† · Sort · Stacked · StackedLineChart† · Strike† ·
+          Tag† · TextFormat · Undo · Redo · UnarchiveOutlined· WavingHand† · Weekend
+        </div>
+
+        <div class="icon-category"><strong>Device</strong><br>
+          AccessAlarm · AccessAlarms · AccessTime · AccessTimeFilled† ·
+          AddAlarm · AddToHomeScreen · AdfScanner† · AirplanemodeActive ·
+          AirplanemodeInactive · AirplayOutlined† · AppBlocking† · AppSettingsAlt† ·
+          AppShortcut† · Battery0Bar† · Battery1Bar† · Battery2Bar† · Battery3Bar† ·
+          Battery4Bar† · Battery5Bar† · Battery6Bar† · BatteryAlert ·
+          BatteryCharging20 · BatteryCharging30 · BatteryCharging50 ·
+          BatteryCharging60 · BatteryCharging80 · BatteryCharging90 · BatteryChargingFull ·
+          BatteryFull · BatterySaver† · BatteryStd · BatteryUnknown ·
+          Bluetooth · BluetoothConnected · BluetoothDisabled · BluetoothDrive† ·
+          BluetoothSearching · BrightnessAuto · BrightnessHigh · BrightnessLow ·
+          BrightnessMedium · DataSaverOff† · DataSaverOn† · DataUsage ·
+          DeveloperMode · DeviceFinder† · DeviceHub† · DeviceThermostat† ·
+          DeviceUnknown · DevicesOther · Dvr · FlashlightOff† · FlashlightOn† ·
+          FolderShared · GpsFixed · GpsNotFixed · GpsOff ·
+          Graphic · GridGoldenratio† · InstallMobile† · KeyboardVoice ·
+          Lan† · Lens · LocationDisabled · LocationSearching ·
+          Looks · MediaBluetoothOff† · MediaBluetoothOn† ·
+          Memory · MobileFriendly · MobileOff · MobileScreenShare† ·
+          MonitorHeart† · MoveDown† · MoveUp† · Nfc ·
+          NightlightRound† · NightMode† · Nightlight† ·
+          OnlinePrediction† · Print · PunchClock† · QuizOutlined† ·
+          RemoveFromQueue · Replay · RotateLeft · RotateRight · RotationLeft† ·
+          ScreenLockLandscape · ScreenLockPortrait · ScreenLockRotation ·
+          ScreenRotation · ScreenRotationAlt† · Screenshot† · ScreenSearchDesktop† ·
+          Sd · SdCard · SdCardAlert† · SdStorage · Security ·
+          SendToMobile† · SettingsCell · SettingsPhone · SettingsSystemDaydream ·
+          SettingsVoice · Share · ShutterSpeed · Signal4Bar† · SignalCellular0Bar ·
+          SignalCellular1Bar · SignalCellular2Bar · SignalCellular3Bar · SignalCellular4Bar ·
+          SignalCellularAlt · SignalCellularConnectedNoInternet0Bar · SignalCellularConnectedNoInternet1Bar ·
+          SignalCellularConnectedNoInternet2Bar · SignalCellularConnectedNoInternet3Bar ·
+          SignalCellularConnectedNoInternet4Bar · SignalCellularNoSim · SignalCellularNull ·
+          SignalCellularOff · SignalWifi0Bar · SignalWifi1Bar · SignalWifi1BarLock ·
+          SignalWifi2Bar · SignalWifi2BarLock · SignalWifi3Bar · SignalWifi3BarLock ·
+          SignalWifi4Bar · SignalWifi4BarLock · SignalWifiBad† · SignalWifiConnectedNoInternet4† ·
+          SignalWifiOff · SignalWifiStatusbar4Bar† · SimCardDownload† · SmartDisplay† ·
+          SmartScreen† · SmartphoneDevice† · SpeakerGroup · Storage ·
+          SystemSecurityUpdate† · SystemSecurityUpdateGood† · SystemSecurityUpdateWarning† ·
+          Tablet · TabletAndroid · TabletMac · TapAndPlay ·
+          Thermostat† · ThermostatAuto† · Timer · Timer10 · Timer10Select† ·
+          Timer3 · Timer3Select† · TimerOff · Usb · UsbOff† ·
+          VideogameAsset · VideogameAssetOff† · Watch · WatchOff† ·
+          Widgets · Wifi · WifiFind† · WifiLock · WifiOff · WifiProtectedSetup†
+        </div>
+
+        <div class="icon-category"><strong>Editor</strong><br>
+          AddChart† · AddComment · AttachFile · AttachMoney · BarChart ·
+          BorderAll · BorderBottom · BorderClear · BorderColor · BorderHorizontal ·
+          BorderInner · BorderLeft · BorderOuter · BorderRight · BorderStyle ·
+          BorderTop · BorderVertical · BubbleChart · Code · ColumnLineChart† ·
+          DataArray† · DataObject† · DragHandle · Draw† · EditNote† ·
+          FormatAlignCenter · FormatAlignJustify · FormatAlignLeft · FormatAlignRight ·
+          FormatBold · FormatClear · FormatColorFill · FormatColorReset · FormatColorText ·
+          FormatIndentDecrease · FormatIndentIncrease · FormatItalic · FormatLetterSpacing† ·
+          FormatLineSpacing · FormatListBulleted · FormatListBulletedAdd† · FormatListNumbered ·
+          FormatListNumberedRtl · FormatOverline· FormatPaint · FormatQuote ·
+          FormatShapes · FormatSize · FormatStrikethrough · FormatTextdirectionLToR ·
+          FormatTextdirectionRToL · FormatUnderlined · Functions · Highlight ·
+          HorizontalRule† · Html† · ImageOutlined† · Ink · InkHighlighter† ·
+          InsertChart · InsertChartOutlined · InsertComment · InsertDriveFile ·
+          InsertEmoticon · InsertInvitation · InsertLink · InsertPageBreak† · InsertPhoto ·
+          LinearScale · Link · MergeType · Mode · ModeComment† · ModeEdit · ModeEditOutline† ·
+          MonetizationOn · Money · MoneyOff · MoneyOffCsred† · MultilineChart ·
+          Notes · PieChart · PieChartOutline† · PieChartOutlined ·
+          Polyline† · PostAdd · Publish · QueryStats† · Redo ·
+          ScatterPlot · Score · ShapeLine† · ShowChart · SpaceBar · Splitscreen† ·
+          Stacked · StackedBarChart† · StackedLineChart† · Subscript† · Superscript† ·
+          TableChart · TableRows† · TableView† · TextDecrease† · TextFields ·
+          TextIncrease† · Title · Toc · TypeSpecimen† · Undo · VerticalAlignBottom ·
+          VerticalAlignCenter · VerticalAlignTop · WrapText
+        </div>
+
+        <div class="icon-category"><strong>File</strong><br>
+          AttachEmail† · AttachFile · AttachMoney · Attachment ·
+          Backup · BackupTable† · Cancel · CloudCircle · CloudDone ·
+          CloudDownload · CloudOff · CloudQueue · CloudSync† · CloudUpload ·
+          CreateNewFolder · Delete · DriveFolderUpload† · FileDownload ·
+          FileDownloadDone† · FileDownloadOff† · FileOpen† · FilePresent† ·
+          FileUpload† · Folder · FolderCopy† · FolderDelete† · FolderOff† ·
+          FolderOpen · FolderShared · FolderZip† · FormatOverline ·
+          Grid3x3† · Grid4x4† · GridOff · GridOn ·
+          InsertDriveFile · NoteAdd · RequestQuote† · Rule† · RuleFolder† ·
+          Restore · RestorePage · Save · SaveAlt · SaveAs† · Share ·
+          SnippetFolder† · Source† · Toc · Topic† · Upload · UploadFile†
+        </div>
+
+        <div class="icon-category"><strong>Hardware</strong><br>
+          Cast · CastConnected · CastForEducation† · Computer ·
+          Desktop · DesktopMac · DesktopWindows · DeveloperBoard · DeveloperBoardOff† ·
+          DeviceHub · DevicesOther · Dns · Dock ·
+          Gamepad · Headphones† · Headset · HeadsetMic · HeadsetOff† ·
+          Keyboard · KeyboardAlt† · KeyboardArrowDown · KeyboardArrowLeft ·
+          KeyboardArrowRight · KeyboardArrowUp · KeyboardBackspace ·
+          KeyboardCapslock · KeyboardCommandKey† · KeyboardControlKey† ·
+          KeyboardDoubleArrowDown† · KeyboardDoubleArrowLeft† · KeyboardDoubleArrowRight† ·
+          KeyboardDoubleArrowUp† · KeyboardHide · KeyboardOptionKey† ·
+          KeyboardReturn · KeyboardTab · KeyboardVoice ·
+          Laptop · LaptopChromebook · LaptopMac · LaptopWindows ·
+          Memory · Mouse · PhoneAndroid · PhoneIphone · PhonelinkOff · PointOfSale† ·
+          Power · PrintOutlined† · Router · Scanner ·
+          Security · SimCard · SimCardAlert · Speaker · SpeakerGroup ·
+          Tablet · TabletAndroid · TabletMac · Toys · Tv · TvOff† ·
+          VideogameAsset · VideogameAssetOff† · Watch
+        </div>
+
+        <div class="icon-category"><strong>Image / Photo</strong><br>
+          AddAPhoto · AddPhotoAlternate · AddToPhotos · Adjust ·
+          Assistant · AssistantPhoto · AutoAwesome† · AutoAwesomeMosaic† · AutoAwesomeMotion† ·
+          AutoFixHigh† · AutoFixNormal† · AutoFixOff† · AutofpsSelect† · AutoGraph† ·
+          Autofocus† · Bedtime† · BedtimeOff† · BlurCircular · BlurLinear ·
+          BlurOff · BlurOn · Brightness1 · Brightness2 · Brightness3 ·
+          Brightness4 · Brightness5 · Brightness6 · Brightness7 ·
+          BrokenImage · Brush · Camera · CameraAlt · CameraFront ·
+          CameraRear · CameraRoll · CameraswapOutlined† · Cases† ·
+          CenterFocusStrong · CenterFocusWeak · Circle† · CollectionsBookmark ·
+          ColorLens · Colorize · Compare · Contrast† · Crop · Crop169 ·
+          Crop32 · Crop54 · Crop75 · CropDin · CropFree · CropLandscape ·
+          CropOriginal · CropPortrait · CropRotate · CropSquare ·
+          Deblur† · DehazeSvg† · Details · Edit · EditOff† ·
+          Exposure · ExposureNeg1 · ExposureNeg2 · ExposurePlus1 · ExposurePlus2 ·
+          ExposureZero · Faceunlock† · Filter · Filter1 · Filter2 · Filter3 ·
+          Filter4 · Filter5 · Filter6 · Filter7 · Filter8 · Filter9 · Filter9Plus ·
+          FilterBAndW · FilterCenterFocus · FilterDrama · FilterFrames ·
+          FilterHdr · FilterNone · FilterTiltShift · FilterVintage ·
+          Flare · FlashAuto · FlashOff · FlashOn · Flip · FlipCameraAndroid · FlipCameraIos ·
+          Gradient · Grain · GridOff · GridOn · HdrAuto† · HdrAutoSelect† ·
+          HdrEnhancedSelect† · HdrOff · HdrOffSelect† · HdrOn · HdrOnSelect† ·
+          HdrPlus† · HdrStrong · HdrWeak · Healing · HideImage† · Image ·
+          ImageAspectRatio · ImageNotSupported† · ImageSearch ·
+          IsoOutlined† · Landscape · Leak · LeakAdd · LeakRemove ·
+          LensBlur† · LinkedCamera · Looks · Looks3 · Looks4 · Looks5 ·
+          Looks6 · LooksOne · LooksTwo · Loupe · MmsOutlined† · MonochromePhotos ·
+          MovieCreation · MovieFilter · MultipleStop† · MusicNote · NaturePeople ·
+          NavigateBefore · NavigateNext · Palette · Photo · PhotoAlbum ·
+          PhotoCamera · PhotoCameraBack† · PhotoCameraFront† · PhotoFilter ·
+          PhotoLibrary · PhotoSizeSelectActual · PhotoSizeSelectLarge · PhotoSizeSelectSmall ·
+          PictureAsPdf · Portrait · Raw · RotateLeft · RotateRight ·
+          Shutter · Slideshow · Straighten · Style · SwitchCamera · SwitchVideo ·
+          TagFaces · Texture · Timer · Timer10 · Timer3 · TimerOff ·
+          Tonality · Transform · Tune · ViewComfy† · ViewCompact† ·
+          Vignette · WbAuto · WbCloudy · WbIncandescent · WbIridescent ·
+          WbShade† · WbSunny · WbTwilight† · Webhook†
+        </div>
+
+        <div class="icon-category"><strong>Maps / Places</strong><br>
+          AccountBalance · AccountBalanceWallet · AccountBox · AccountCircle ·
+          AddBusiness† · AddHomeWork† · AddLocation · AddLocationAlt† · AddRoad† ·
+          Atm · Attractions† · Badge† · BeachAccess · BikeScooter† ·
+          Bolt · BookOnline† · BrunchDining† · BusinessCenter ·
+          CarCrash† · CarRental† · CarRepair† · Category ·
+          CleaningServices† · Compass† · CompassCalibration · Delivery† ·
+          DinnerDining† · DirectionsBike · DirectionsBoat · DirectionsBoatFilled† ·
+          DirectionsBus · DirectionsBusFilled† · DirectionsCar · DirectionsCarFilled† ·
+          DirectionsOff† · DirectionsRailway · DirectionsRailwayFilled† ·
+          DirectionsRun · DirectionsSubway · DirectionsSubwayFilled† ·
+          DirectionsTransit · DirectionsTransitFilled† · DirectionsWalk ·
+          DryCleaningOutlined† · EditLocation · EditLocationAlt† · EditRoad† ·
+          ElderlyOutlined† · ElectricBike† · ElectricBolt† · ElectricCar† ·
+          ElectricMoped† · ElectricRickshaw† · ElectricScooter† ·
+          EmojiFoodBeverage · Explore · ExploreOff† · FastfoodOutlined† ·
+          Festival† · FindReplace · Flight · FlightClass† ·
+          GolfCourse · Hail† · Hardware† · Hotel · HotelClass† · HourglassBottom† ·
+          IcecreamOutlined† · KebabDining† · Layers · LayersClear · LocalActivity ·
+          LocalAirport · LocalAtm · LocalBar · LocalCafe · LocalCarWash ·
+          LocalConvenienceStore · LocalDining · LocalDrink · LocalFireDepartment† ·
+          LocalFlorist · LocalGasStation · LocalGroceryStore · LocalHospital ·
+          LocalHotel · LocalLaundryService · LocalLibrary · LocalMall ·
+          LocalMovies · LocalOffer · LocalParking · LocalPharmacy · LocalPhone ·
+          LocalPizza · LocalPlay · LocalPolice† · LocalPostOffice · LocalPrintshop ·
+          LocalSee · LocalShipping · LocalTaxi · Map · MapsHomeWork† ·
+          MapsUgc† · MenuBook† · MilitaryTech† · MinorCrash† ·
+          MiscellaneousServices† · Moped† · Mosque† · Museum† · MyLocation ·
+          Navigation · NearMe · NearMeDisabled† · NotListedLocation ·
+          OutdoorGrill† · Paid† · Paragliding† · PedalBike† · Person ·
+          PersonOutline · PersonPin · PersonPinCircle · PinDrop ·
+          Place · PlayLesson† · PriceChange† · PriceCheck† · RamenDining† ·
+          RateReview · Restaurant · RestaurantMenu · RoofingOutlined† ·
+          RoomService† · RunCircle† · Safety† · Set · SetMeal† ·
+          Signpost† · Skateboarding† · Sledding† · Snowboarding† ·
+          Snowshoeing† · Spa · SportsHandball† · Store · Streetview · Synagogue† ·
+          Tapas† · Terrain · Theater · Traffic · Train ·
+          Tram · Transfer · Trolley† · TwoWheeler† · Villa† ·
+          Volunteer† · Warehouse† · WaterSports† · WhereToVote · Zoom
+        </div>
+
+        <div class="icon-category"><strong>Social</strong><br>
+          Cake · Domain · EmojiEmotions† · EmojiEvents† · EmojiFlags† ·
+          EmojiFoodBeverage† · EmojiNature† · EmojiObjects† · EmojiPeople† ·
+          EmojiSymbols† · EmojiTransportation† · Engineering† ·
+          Facebook† · FamilyRestroom† · Female† · FitnessCenter ·
+          Group · GroupAdd · GroupOff† · GroupRemove† · GroupWork ·
+          HealthAndSafety† · Hiking† · History · HomeWork† ·
+          IceSkating† · Interests† · InterpreterMode† · Kayaking† ·
+          Kitesurfing† · Male† · ManOutlined† · ManageAccounts† ·
+          Military† · Mood · MoodBad · Nightlife† ·
+          NordicWalking† · OutdoorGrill† · Pages · Paragliding† ·
+          People · PeopleAlt† · PeopleOutline† · Person ·
+          PersonAdd · PersonAddAlt† · PersonAddAlt1† · PersonAddDisabled† ·
+          PersonOff† · PersonOutline · PersonPin · PersonPinCircle ·
+          PersonRemove† · PersonRemoveAlt1† · PersonSearch† · Plumbing† ·
+          Poll · Public · PublicOff† · Recommend† ·
+          RecordVoiceOver · ReduceCapacity† · Roller† · SafetyDivider† ·
+          Scuba† · SentimentDissatisfied · SentimentNeutral ·
+          SentimentSatisfied · SentimentSatisfiedAlt† · SentimentVeryDissatisfied ·
+          SentimentVerySatisfied† · Share · Skateboarding† ·
+          Sledding† · Snowboarding† · Snowshoeing† · Social† ·
+          SocialDistance† · Sports · SportsBar† · SportsBaseball† ·
+          SportsBasketball · SportsCricket† · SportsEsports ·
+          SportsFootball · SportsGolf · SportsGymnastics† · SportsHandball† ·
+          SportsHockey · SportsKabaddi† · SportsMartialArts† · SportsMma ·
+          SportsMotorsports† · SportsOutlined† · SportsRugby† ·
+          SportsSoccer · SportsTennis · SportsVolleyball ·
+          Surfing† · TheaterComedy† · Transgender† · Volunteer† ·
+          WheelchairPickup† · Whatshot · WomanOutlined† · WorkspacePremium†
+        </div>
+
+        <div class="icon-category"><strong>Places / Architecture</strong><br>
+          Apartment† · Cabin† · Chalet† · Cottage† · Fence† · FireHydrant† ·
+          Garage† · GolfCourse · Holiday† · Home · House† · HouseOutlined† ·
+          HouseSiding† · Houseboat† · KingBed† · MeetingRoom† · NightShelter† ·
+          NoMeetingRoom† · OtherHouses† · Pool · SingleBed† · Spa · Stairs†
+        </div>
+
+        <p style="font-size:0.8rem;color:var(--on-surface-variant);margin-top:12px">† = requires <code>material-icons-extended</code> artifact. Browse the full interactive list at <a href="https://fonts.google.com/icons" target="_blank">fonts.google.com/icons</a>.</p>
+      </div>
+    </div>
+
+    <!-- TEXT -->
+    <div class="subsection" id="text">
+      <div class="sub-header">
+        <h2>Text</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/text" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Render text with <code>Text()</code>. Center horizontally with <code>textAlign = TextAlign.Center</code> and vertically with <code>Modifier.wrapContentHeight(Alignment.CenterVertically)</code>.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-text-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-text-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>wrapContentHeight(Alignment.CenterVertically):</strong> Makes the composable measure at its intrinsic height then position itself centered within the space the parent allocated. Without it, <code>Text</code> placed inside a taller container sits at the top.</p>
+            <p><strong>textAlign vs Modifier.align:</strong> <code>textAlign = TextAlign.Center</code> centers the text <em>within the Text composable's own bounds</em>. <code>Modifier.align()</code> (inside a Box/Row/Column) positions the whole composable within its parent. You often need both.</p>
+            <p><strong>wrapContentWidth(Alignment.CenterHorizontally):</strong> Same idea on the horizontal axis — useful when the parent fills width but the text content is short.</p>
+            <p><strong>Overflow:</strong> <code>TextOverflow.Ellipsis</code> clips long text with "…". Always pair with <code>maxLines</code>.</p>
+            <p><strong>AnnotatedString:</strong> Mix styles inline — <code>buildAnnotatedString { withStyle(SpanStyle(color = ...)) { append("part") } }</code>.</p>
+            <p><strong>SelectionContainer:</strong> Wrap <code>Text</code> in <code>SelectionContainer { }</code> to enable long-press text selection.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- SHAPES -->
+    <div class="subsection" id="shapes">
+      <div class="sub-header">
+        <h2>Shapes / RoundRect</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/graphics/draw/shapes" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Apply shapes via <code>Modifier.clip()</code> or use <code>Card</code>/<code>Surface</code> shape parameter. MD3 ships with predefined shape tokens.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-shape-q" class="language-kotlin"></code></pre>
+      </div>
+    </div>
+
+    <!-- CONSTRAINTLAYOUT -->
+    <div class="subsection" id="constraintlayout">
+      <div class="sub-header">
+        <h2>ConstraintLayout</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/layouts/constraintlayout" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Use when you need complex positioning (bias, barriers, guidelines). Add <code>constraintlayout-compose</code> to dependencies.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-cl-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-cl-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEXTFIELD -->
+    <div class="subsection" id="textfield">
+      <div class="sub-header">
+        <h2>TextField / TextArea</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/text/user-input" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc"><code>TextField</code> (filled) and <code>OutlinedTextField</code> for single-line input. Multiline via <code>minLines</code>/<code>maxLines</code>. Use <code>BasicTextField</code> for full custom styling.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-tf-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-tf-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>TextField vs OutlinedTextField:</strong> Both are Material 3 variants. <code>TextField</code> has a filled background, <code>OutlinedTextField</code> has a border. Prefer <code>OutlinedTextField</code> when the background is already colored.</p>
+            <p><strong>KeyboardOptions:</strong> Use <code>KeyboardType.Email</code>, <code>Phone</code>, <code>Number</code>, <code>Password</code>; <code>ImeAction.Next</code>, <code>Done</code>, <code>Search</code>, <code>Send</code>.</p>
+            <p><strong>KeyboardActions:</strong> Respond to the IME action button — e.g., submit a form on <code>ImeAction.Done</code> or move focus on <code>ImeAction.Next</code>.</p>
+            <p><strong>VisualTransformation:</strong> Use <code>PasswordVisualTransformation()</code> to mask characters. Toggle with a trailing eye icon.</p>
+            <p><strong>TextFieldValue vs String:</strong> Use <code>TextFieldValue</code> when you need cursor position or selection range control.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- TEXTFIELD STYLING -->
+    <div class="subsection" id="textfield-style">
+      <div class="sub-header">
+        <h2>Styling TextField</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/text/user-input#style" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Change colors, shape, and borders via <code>TextFieldDefaults.colors()</code> for Material fields, or use <code>BasicTextField</code> + a custom <code>decorationBox</code> for full control.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-tfstyle-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-tfstyle-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>TextFieldDefaults.colors():</strong> Controls every color slot — focused/unfocused container, label, indicator (underline/border), cursor, text, placeholder, leading/trailing icon.</p>
+            <p><strong>Transparent container:</strong> Set <code>containerColor = Color.Transparent</code> and <code>unfocusedIndicatorColor = Color.Transparent</code> + <code>focusedIndicatorColor = Color.Transparent</code> to remove all background and underline — then draw your own border with <code>Modifier.border()</code>.</p>
+            <p><strong>Shape:</strong> <code>OutlinedTextField</code> and <code>TextField</code> accept a <code>shape</code> param. Use <code>RoundedCornerShape(50)</code> for a pill-style search bar.</p>
+            <p><strong>BasicTextField + decorationBox:</strong> The most flexible option — you fully own the outer container. Useful for chat bubbles, inline editors, and branded designs that don't match MD3.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- KEYBOARD / IME -->
+    <div class="subsection" id="keyboard">
+      <div class="sub-header">
+        <h2>Keyboard / IME Animation</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/layouts/insets" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Animate layout when the software keyboard appears/disappears. Hide/show fields based on keyboard state. Use WindowInsets + <code>imePadding()</code> or <code>imeNestedScroll()</code>.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-kbd-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-kbd-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>windowSoftInputMode:</strong> In the Manifest, set <code>android:windowSoftInputMode="adjustResize"</code> on the Activity (or use <code>WindowCompat.setDecorFitsSystemWindows(window, false)</code> in code) so the window actually resizes and insets work correctly.</p>
+            <p><strong>imePadding() vs imeNestedScroll():</strong> Use <code>imePadding()</code> to add bottom padding equal to the keyboard height. Use <code>imeNestedScroll()</code> on a scrollable to let the keyboard dismiss by scrolling down.</p>
+            <p><strong>isImeVisible:</strong> <code>WindowInsets.isImeVisible</code> is a Compose state — reading it causes recomposition whenever the keyboard appears/disappears. Ideal for hiding/showing UI elements.</p>
+            <p><strong>Animated hide/show:</strong> Wrap the element you want to hide/show in <code>AnimatedVisibility(visible = !isKeyboardVisible)</code> to get a smooth slide animation.</p>
+            <p><strong>FocusRequester:</strong> Programmatically open the keyboard with <code>focusRequester.requestFocus()</code> + <code>keyboardController.show()</code>.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- ANIMATIONS -->
+    <div class="subsection" id="animations">
+      <div class="sub-header">
+        <h2>Animations</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/animation/introduction" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Compose animation APIs: <code>AnimatedVisibility</code>, <code>animateFloatAsState</code>, <code>animateDpAsState</code>, <code>animate*AsState</code>, <code>Crossfade</code>, <code>AnimatedContent</code>, and custom transitions.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin — AnimatedVisibility</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-anim-vis-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-anim-vis-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin — animate*AsState</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-anim-state-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-anim-state-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin — Crossfade &amp; AnimatedContent</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-anim-cross-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-anim-cross-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>EnterTransition / ExitTransition combinators:</strong> Use <code>+</code> to combine. E.g. <code>fadeIn() + slideInVertically()</code>. Built-in options:</p>
+            <ul>
+              <li><code>fadeIn()</code> / <code>fadeOut()</code></li>
+              <li><code>slideInVertically { it }</code> / <code>slideOutVertically { it }</code> — pass a lambda returning the offset in px (<code>it</code> = full height)</li>
+              <li><code>slideInHorizontally { -it }</code> — slide in from left</li>
+              <li><code>expandVertically()</code> / <code>shrinkVertically()</code> — grow/shrink from top or bottom</li>
+              <li><code>expandHorizontally()</code> / <code>shrinkHorizontally()</code></li>
+              <li><code>scaleIn()</code> / <code>scaleOut()</code></li>
+            </ul>
+            <p><strong>animationSpec:</strong> Pass to any animate* function. Common specs:</p>
+            <ul>
+              <li><code>tween(durationMillis = 300, easing = FastOutSlowInEasing)</code> — linear with easing curve</li>
+              <li><code>spring(dampingRatio = Spring.DampingRatioMediumBouncy)</code> — physics-based, no fixed duration</li>
+              <li><code>keyframes { durationMillis = 500; 0.5f at 200 }</code> — value at specific keyframe times</li>
+            </ul>
+            <p><strong>updateTransition:</strong> For coordinating multiple animated values that share a single state change. Avoids multiple <code>animate*AsState</code> calls that might drift out of sync.</p>
+            <p><strong>rememberInfiniteTransition:</strong> For looping animations (loading shimmer, pulse, breathing effects). Use <code>animateFloat(initialValue, targetValue, infiniteRepeatable(...))</code>.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- REMEMBER -->
+    <div class="subsection" id="remember">
+      <div class="sub-header">
+        <h2>remember</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/state" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Caches a value across recompositions. Does <em>not</em> survive configuration changes — use <code>rememberSaveable</code> for that.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-remember-q" class="language-kotlin"></code></pre>
+      </div>
+      <div class="callout tip"><strong>Interview tip:</strong> <code>remember { }</code> vs <code>rememberSaveable { }</code> — the latter survives process death and config changes via saved state. Use it for user input fields.</div>
+    </div>
+
+    <!-- MUTABLESTATEOF -->
+    <div class="subsection" id="mutablestate">
+      <div class="sub-header">
+        <h2>mutableStateOf</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/state" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Creates observable state that triggers recomposition when changed. Three delegation styles: <code>by</code>, destructuring, or direct.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-mstate-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-mstate-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- DERIVEDSTATEOF -->
+    <div class="subsection" id="derivedstate">
+      <div class="sub-header">
+        <h2>derivedStateOf</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/state#derivedstateof" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Computes a value from other state objects. Recomposition only triggers when the <em>derived result</em> changes, not every time the input state changes.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-derived-q" class="language-kotlin"></code></pre>
+      </div>
+      <div class="callout tip"><strong>Interview tip:</strong> Use <code>derivedStateOf</code> when you'd otherwise read state at a high frequency (like scroll position) but only need to recompose when a threshold is crossed.</div>
+    </div>
+
+    <!-- LAUNCHEDEFFECT -->
+    <div class="subsection" id="launchedeffect">
+      <div class="sub-header">
+        <h2>LaunchedEffect</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/side-effects#launchedeffect" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Runs a suspend block when the composable enters composition. Re-runs if a key changes. Cancelled when it leaves composition.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-le-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-le-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIDEEFFECT -->
+    <div class="subsection" id="sideeffect">
+      <div class="sub-header">
+        <h2>SideEffect</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/side-effects#sideeffect" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Runs after every <em>successful</em> recomposition. Use to push Compose state into non-Compose code (e.g., analytics, Firebase).</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns"><button class="btn-sm" onclick="copyCode(this)">Copy</button></div>
+        </div>
+        <pre><code id="code-se-q" class="language-kotlin"></code></pre>
+      </div>
+      <div class="callout warn"><strong>Note:</strong> Unlike LaunchedEffect, SideEffect is not a coroutine — it runs synchronously after recomposition. Don't do heavy work here.</div>
+    </div>
+
+    <!-- DISPOSABLEEFFECT -->
+    <div class="subsection" id="disposableeffect">
+      <div class="sub-header">
+        <h2>DisposableEffect</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/side-effects#disposableeffect" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Like LaunchedEffect but for non-suspend side effects that need cleanup via <code>onDispose { }</code>. Re-runs when keys change.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-de-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-de-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const CODE = {
+'row-q': `Row(
+    modifier = Modifier.fillMaxWidth().padding(16.dp),
+    horizontalArrangement = Arrangement.SpaceBetween,
+    verticalAlignment = Alignment.CenterVertically
+) {
+    Text("Left")
+    Text("Right")
+}
+
+// weight — icon | flexible title | action button
+Row(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+    Icon(Icons.Default.Star, contentDescription = null)
+    Spacer(Modifier.width(8.dp))
+    Text("Title", modifier = Modifier.weight(1f))  // takes all remaining space
+    TextButton(onClick = {}) { Text("Action") }
+}`,
+'row-f': `// Push trailing item to the end with weight
+Row(modifier = Modifier.fillMaxWidth()) {
+    Icon(Icons.Default.Star, contentDescription = null)
+    Spacer(Modifier.width(8.dp))
+    Text("Title", modifier = Modifier.weight(1f))  // fills remaining space
+    TextButton(onClick = {}) { Text("Action") }
+}
+
+// Fixed spacing between all children
+Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    repeat(4) { Chip(label = { Text("Tag $it") }) }
+}
+
+// Scrollable horizontal row
+Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
+    items.forEach { Text(it, modifier = Modifier.padding(8.dp)) }
+}`,
+
+'box-q': `Box(
+    modifier = Modifier.size(120.dp),
+    contentAlignment = Alignment.Center
+) {
+    Image(painter = painterResource(R.drawable.avatar), contentDescription = null)
+    // Badge overlaid in the top-end corner
+    Badge(modifier = Modifier.align(Alignment.TopEnd)) { Text("3") }
+}`,
+'box-f': `// Loading overlay pattern
+Box(modifier = Modifier.fillMaxSize()) {
+    LazyColumn { /* content */ }
+
+    if (isLoading) {
+        // Scrim + spinner
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.4f)),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    }
+}
+
+// BoxWithConstraints — size-aware layout
+BoxWithConstraints {
+    if (maxWidth > 600.dp) {
+        TwoColumnLayout()
+    } else {
+        SingleColumnLayout()
+    }
+}`,
+
+'col-q': `// weight — scrollable content + pinned footer
+Column(modifier = Modifier.fillMaxSize()) {
+    LazyColumn(modifier = Modifier.weight(1f)) {  // fills all remaining height
+        items(list) { item -> ListItem(item) }
+    }
+    Button(
+        onClick = {},
+        modifier = Modifier.fillMaxWidth().padding(16.dp)
+    ) { Text("Pinned Footer Button") }
+}`,
+'col-f': `// Basic Column
+Column(
+    modifier = Modifier.fillMaxWidth().padding(16.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp),
+    horizontalAlignment = Alignment.CenterHorizontally
+) {
+    Text("Item 1", style = MaterialTheme.typography.titleMedium)
+    Text("Item 2")
+    Button(onClick = {}) { Text("Action") }
+}
+
+// Equal-height sections with weight(1f)
+Column(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.weight(1f).background(Color.LightGray)) { Text("Top half") }
+    Box(modifier = Modifier.weight(1f).background(Color.White)) { Text("Bottom half") }
+}
+
+// 2:1 ratio split
+Column(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.weight(2f)) { Text("Takes 2/3 of height") }
+    Box(modifier = Modifier.weight(1f)) { Text("Takes 1/3 of height") }
+}
+
+// Weighted Row: proportional column widths
+Row(modifier = Modifier.fillMaxWidth()) {
+    Text("Label", modifier = Modifier.weight(0.3f))   // 30%
+    Text("Value", modifier = Modifier.weight(0.7f))   // 70%
+}`,
+
+'lazy-q': `LazyColumn(
+    contentPadding = PaddingValues(16.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp)
+) {
+    items(items = myList, key = { it.id }) { item ->
+        ItemCard(item)
+    }
+    item { Text("Footer") }
+}`,
+'lazy-f': `// LazyRow
+LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    items(chips) { chip -> FilterChip(selected = false, onClick = {}, label = { Text(chip) }) }
+}
+
+// LazyVerticalGrid
+LazyVerticalGrid(
+    columns = GridCells.Adaptive(minSize = 150.dp),
+    contentPadding = PaddingValues(8.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp),
+    horizontalArrangement = Arrangement.spacedBy(8.dp)
+) {
+    items(photos, key = { it.id }) { photo -> PhotoCard(photo) }
+}
+
+// itemsIndexed
+LazyColumn {
+    itemsIndexed(list) { index, item ->
+        if (index > 0) HorizontalDivider()
+        ListItem(headlineContent = { Text(item.name) })
+    }
+}`,
+'lazy-extra': `val listState = rememberLazyListState()
+val coroutineScope = rememberCoroutineScope()
+
+// Scroll to top
+Button(onClick = { coroutineScope.launch { listState.animateScrollToItem(0) } }) {
+    Text("Scroll to top")
+}
+
+// Show FAB only when scrolled down
+val showFab by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }`,
+
+'pager-q': `val pagerState = rememberPagerState(pageCount = { pages.size })
+
+HorizontalPager(state = pagerState) { page ->
+    Text("Page $page", modifier = Modifier.fillMaxWidth().padding(16.dp))
+}`,
+'pager-f': `val pages = listOf("Home", "Search", "Profile")
+val pagerState = rememberPagerState(pageCount = { pages.size })
+val scope = rememberCoroutineScope()
+
+Column {
+    // Tabs linked to pager
+    TabRow(selectedTabIndex = pagerState.currentPage) {
+        pages.forEachIndexed { index, title ->
+            Tab(
+                selected = pagerState.currentPage == index,
+                onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                text = { Text(title) }
+            )
+        }
+    }
+
+    HorizontalPager(
+        state = pagerState,
+        modifier = Modifier.fillMaxSize()
+    ) { page ->
+        when (page) {
+            0 -> HomeScreen()
+            1 -> SearchScreen()
+            2 -> ProfileScreen()
+        }
+    }
+}
+
+// Page indicator dots
+Row {
+    repeat(pagerState.pageCount) { i ->
+        Box(
+            modifier = Modifier
+                .size(if (i == pagerState.currentPage) 10.dp else 6.dp)
+                .clip(CircleShape)
+                .background(if (i == pagerState.currentPage) Primary else Gray)
+        )
+        Spacer(Modifier.width(4.dp))
+    }
+}`,
+
+'img-q': `// Drawable resource
+Image(
+    painter = painterResource(R.drawable.banner),
+    contentDescription = "Banner",
+    contentScale = ContentScale.Crop,
+    modifier = Modifier.fillMaxWidth().height(200.dp)
+)`,
+'img-f': `// Vector drawable
+Image(
+    painter = painterResource(R.drawable.ic_logo),
+    contentDescription = "Logo"
+)
+
+// Material default icon
+Icon(
+    imageVector = Icons.Default.Favorite,
+    contentDescription = "Favorite",
+    tint = MaterialTheme.colorScheme.primary
+)
+
+// Outlined / Rounded icon variants
+Icon(imageVector = Icons.Outlined.Settings, contentDescription = "Settings")
+
+// Network image with Coil
+AsyncImage(
+    model = ImageRequest.Builder(LocalContext.current)
+        .data("https://example.com/photo.jpg")
+        .crossfade(true)
+        .build(),
+    contentDescription = "Photo",
+    contentScale = ContentScale.Crop,
+    placeholder = painterResource(R.drawable.placeholder),
+    error = painterResource(R.drawable.error_image)
+)
+
+// rememberAsyncImagePainter (for Image composable)
+val painter = rememberAsyncImagePainter("https://example.com/photo.jpg")
+Image(painter = painter, contentDescription = null)`,
+
+'shape-q': `// Clip a Box to a rounded rectangle
+Box(
+    modifier = Modifier
+        .size(80.dp)
+        .clip(RoundedCornerShape(16.dp))
+        .background(MaterialTheme.colorScheme.primaryContainer)
+)
+
+// Card uses shape param
+Card(shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)) {
+    Text("Partial rounded", modifier = Modifier.padding(16.dp))
+}
+
+// MD3 shape tokens
+Card(shape = MaterialTheme.shapes.medium) { /* … */ }   // ExtraSmall/Small/Medium/Large/ExtraLarge`,
+
+'cl-q': `ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+    val (title, button) = createRefs()
+
+    Text(
+        text = "Hello",
+        modifier = Modifier.constrainAs(title) {
+            top.linkTo(parent.top, margin = 16.dp)
+            start.linkTo(parent.start, margin = 16.dp)
+        }
+    )
+    Button(
+        onClick = {},
+        modifier = Modifier.constrainAs(button) {
+            top.linkTo(title.bottom, margin = 8.dp)
+            end.linkTo(parent.end, margin = 16.dp)
+        }
+    ) { Text("Click") }
+}`,
+'cl-f': `ConstraintLayout(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+    val (image, name, role, divider) = createRefs()
+    val guideline = createGuidelineFromStart(0.3f)  // 30% from start
+
+    Image(
+        painter = painterResource(R.drawable.avatar),
+        contentDescription = null,
+        modifier = Modifier
+            .size(64.dp)
+            .clip(CircleShape)
+            .constrainAs(image) {
+                top.linkTo(parent.top)
+                start.linkTo(parent.start)
+            }
+    )
+    Text("Jane Doe", modifier = Modifier.constrainAs(name) {
+        top.linkTo(image.top)
+        start.linkTo(guideline, margin = 8.dp)
+    })
+    Text("Android Engineer", modifier = Modifier.constrainAs(role) {
+        top.linkTo(name.bottom, margin = 4.dp)
+        start.linkTo(guideline, margin = 8.dp)
+    })
+    // Barrier example
+    val barrier = createEndBarrier(name, role)
+    // Chain example
+    createHorizontalChain(name, role, chainStyle = ChainStyle.Packed)
+}`,
+
+'tf-q': `// Single-line TextField
+var text by remember { mutableStateOf("") }
+OutlinedTextField(
+    value = text,
+    onValueChange = { text = it },
+    label = { Text("Username") },
+    singleLine = true,
+    keyboardOptions = KeyboardOptions(
+        keyboardType = KeyboardType.Text,
+        imeAction = ImeAction.Next
+    )
+)
+
+// Multiline TextArea
+var bio by remember { mutableStateOf("") }
+OutlinedTextField(
+    value = bio,
+    onValueChange = { bio = it },
+    label = { Text("Bio") },
+    minLines = 3,
+    maxLines = 6,     // scrollable beyond this
+    modifier = Modifier.fillMaxWidth()
+)`,
+'tf-f': `// Password field with toggle
+var password by remember { mutableStateOf("") }
+var showPassword by remember { mutableStateOf(false) }
+
+OutlinedTextField(
+    value = password,
+    onValueChange = { password = it },
+    label = { Text("Password") },
+    singleLine = true,
+    visualTransformation = if (showPassword) VisualTransformation.None
+                           else PasswordVisualTransformation(),
+    trailingIcon = {
+        IconButton(onClick = { showPassword = !showPassword }) {
+            Icon(
+                imageVector = if (showPassword) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                contentDescription = if (showPassword) "Hide password" else "Show password"
+            )
+        }
+    },
+    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+)
+
+// ImeAction.Done — dismiss keyboard and submit
+val keyboardController = LocalSoftwareKeyboardController.current
+OutlinedTextField(
+    value = searchQuery,
+    onValueChange = { searchQuery = it },
+    label = { Text("Search") },
+    singleLine = true,
+    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+    keyboardActions = KeyboardActions(
+        onSearch = {
+            keyboardController?.hide()
+            performSearch(searchQuery)
+        }
+    ),
+    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+    trailingIcon = {
+        if (searchQuery.isNotEmpty()) {
+            IconButton(onClick = { searchQuery = "" }) {
+                Icon(Icons.Default.Clear, contentDescription = "Clear")
+            }
+        }
+    }
+)
+
+// FocusRequester — move focus between fields (Next action)
+val focusManager = LocalFocusManager.current
+val (emailFocus, passwordFocus) = remember { FocusRequester.createRefs() }
+
+OutlinedTextField(
+    value = email, onValueChange = { email = it },
+    label = { Text("Email") }, singleLine = true,
+    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+    keyboardActions = KeyboardActions(onNext = { passwordFocus.requestFocus() }),
+    modifier = Modifier.focusRequester(emailFocus)
+)
+OutlinedTextField(
+    value = password, onValueChange = { password = it },
+    label = { Text("Password") }, singleLine = true,
+    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+    modifier = Modifier.focusRequester(passwordFocus)
+)
+
+// BasicTextField — fully custom styling
+BasicTextField(
+    value = text,
+    onValueChange = { text = it },
+    textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+    decorationBox = { innerTextField ->
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+                .padding(12.dp)
+        ) {
+            if (text.isEmpty()) Text("Placeholder…", color = Color.Gray)
+            innerTextField()
+        }
+    }
+)`,
+
+'tfstyle-q': `// Change colors via TextFieldDefaults.colors()
+OutlinedTextField(
+    value = text,
+    onValueChange = { text = it },
+    label = { Text("Email") },
+    shape = RoundedCornerShape(12.dp),
+    colors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor   = MaterialTheme.colorScheme.primary,
+        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+        focusedLabelColor    = MaterialTheme.colorScheme.primary,
+        cursorColor          = MaterialTheme.colorScheme.primary,
+    )
+)`,
+'tfstyle-f': `// Fully transparent — no background, no underline, custom border
+OutlinedTextField(
+    value = text,
+    onValueChange = { text = it },
+    shape = RoundedCornerShape(50),   // pill shape
+    colors = OutlinedTextFieldDefaults.colors(
+        focusedContainerColor   = Color.Transparent,
+        unfocusedContainerColor = Color.Transparent,
+        focusedBorderColor      = MaterialTheme.colorScheme.primary,
+        unfocusedBorderColor    = Color.LightGray,
+    ),
+    modifier = Modifier.fillMaxWidth()
+)
+
+// Filled TextField — remove underline indicator
+TextField(
+    value = text,
+    onValueChange = { text = it },
+    colors = TextFieldDefaults.colors(
+        focusedContainerColor       = MaterialTheme.colorScheme.surfaceVariant,
+        unfocusedContainerColor     = MaterialTheme.colorScheme.surfaceVariant,
+        focusedIndicatorColor       = Color.Transparent,   // hide underline when focused
+        unfocusedIndicatorColor     = Color.Transparent,   // hide underline when unfocused
+        disabledIndicatorColor      = Color.Transparent,
+    ),
+    shape = RoundedCornerShape(8.dp)
+)
+
+// BasicTextField — fully custom chat-bubble style
+var text by remember { mutableStateOf("") }
+BasicTextField(
+    value = text,
+    onValueChange = { text = it },
+    textStyle = LocalTextStyle.current.copy(
+        color    = MaterialTheme.colorScheme.onSurface,
+        fontSize = 16.sp
+    ),
+    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+    modifier = Modifier.fillMaxWidth(),
+    decorationBox = { innerTextField ->
+        Row(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(24.dp))
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.weight(1f)) {
+                if (text.isEmpty()) {
+                    Text("Message…", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                innerTextField()
+            }
+            IconButton(onClick = { send(text); text = "" }) {
+                Icon(Icons.Default.Send, contentDescription = "Send")
+            }
+        }
+    }
+)
+
+// Error state styling
+OutlinedTextField(
+    value = email,
+    onValueChange = { email = it },
+    label = { Text("Email") },
+    isError = email.isNotEmpty() && !email.contains("@"),
+    supportingText = {
+        if (email.isNotEmpty() && !email.contains("@")) {
+            Text("Invalid email", color = MaterialTheme.colorScheme.error)
+        }
+    },
+    trailingIcon = {
+        if (email.isNotEmpty() && !email.contains("@")) {
+            Icon(Icons.Default.Error, contentDescription = "Error",
+                tint = MaterialTheme.colorScheme.error)
+        }
+    }
+)`,
+
+'anim-vis-q': `var visible by remember { mutableStateOf(true) }
+
+// Fade + slide from bottom
+AnimatedVisibility(
+    visible = visible,
+    enter = fadeIn() + slideInVertically { it },    // it = full height px
+    exit  = fadeOut() + slideOutVertically { it }
+) {
+    Card { Text("I animate in and out", modifier = Modifier.padding(16.dp)) }
+}
+
+Button(onClick = { visible = !visible }) { Text("Toggle") }`,
+'anim-vis-f': `// Slide in from top
+AnimatedVisibility(
+    visible = showHeader,
+    enter = slideInVertically { -it } + fadeIn(),
+    exit  = slideOutVertically { -it } + fadeOut()
+) { TopBar() }
+
+// Slide in from left / right
+AnimatedVisibility(
+    visible = showPanel,
+    enter = slideInHorizontally { -it },   // from left
+    exit  = slideOutHorizontally { -it }
+) { SidePanel() }
+
+// Expand / shrink vertically (like an accordion)
+AnimatedVisibility(
+    visible = expanded,
+    enter = expandVertically(expandFrom = Alignment.Top),
+    exit  = shrinkVertically(shrinkTowards = Alignment.Top)
+) { ExpandedContent() }
+
+// Scale in (like a popup / FAB menu)
+AnimatedVisibility(
+    visible = showMenu,
+    enter = scaleIn(transformOrigin = TransformOrigin(0.5f, 1f)) + fadeIn(),
+    exit  = scaleOut(transformOrigin = TransformOrigin(0.5f, 1f)) + fadeOut()
+) { DropdownMenuContent() }
+
+// Custom tween spec
+AnimatedVisibility(
+    visible = visible,
+    enter = fadeIn(animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)),
+    exit  = fadeOut(animationSpec = tween(durationMillis = 200))
+) { Content() }
+
+// Spring bounce
+AnimatedVisibility(
+    visible = visible,
+    enter = slideInVertically(
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+    ) { it }
+) { BounceCard() }`,
+
+'anim-state-q': `// Animate a single value — recomposes smoothly on state change
+var selected by remember { mutableStateOf(false) }
+
+val bgColor by animateColorAsState(
+    targetValue = if (selected) MaterialTheme.colorScheme.primaryContainer
+                  else MaterialTheme.colorScheme.surface,
+    label = "bg_color"
+)
+val elevation by animateDpAsState(
+    targetValue = if (selected) 8.dp else 2.dp,
+    label = "elevation"
+)
+
+Card(
+    modifier = Modifier
+        .clickable { selected = !selected }
+        .shadow(elevation),
+    colors = CardDefaults.cardColors(containerColor = bgColor)
+) { Text("Tap me") }`,
+'anim-state-f': `// animateFloatAsState — alpha, scale, rotation
+val alpha by animateFloatAsState(
+    targetValue = if (enabled) 1f else 0.4f,
+    label = "alpha"
+)
+Box(modifier = Modifier.alpha(alpha)) { Content() }
+
+// Rotation
+val rotation by animateFloatAsState(
+    targetValue = if (expanded) 180f else 0f,
+    animationSpec = tween(300),
+    label = "rotation"
+)
+Icon(
+    imageVector = Icons.Default.ExpandMore,
+    contentDescription = null,
+    modifier = Modifier.rotate(rotation)
+)
+
+// animateDpAsState — size change
+val size by animateDpAsState(
+    targetValue = if (active) 120.dp else 60.dp,
+    animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+    label = "size"
+)
+Box(modifier = Modifier.size(size).clip(CircleShape).background(Primary))
+
+// animateIntAsState — counter
+val displayCount by animateIntAsState(targetValue = count, label = "count")
+Text("$displayCount items")
+
+// Infinite repeating animation (shimmer / pulse)
+val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
+val shimmerAlpha by infiniteTransition.animateFloat(
+    initialValue = 0.3f,
+    targetValue  = 1f,
+    animationSpec = infiniteRepeatable(
+        animation = tween(800, easing = LinearEasing),
+        repeatMode = RepeatMode.Reverse
+    ),
+    label = "shimmer_alpha"
+)
+Box(modifier = Modifier.fillMaxWidth().height(20.dp)
+    .alpha(shimmerAlpha).background(Color.LightGray))
+
+// updateTransition — coordinate multiple values from one state
+val transition = updateTransition(targetState = selected, label = "card_transition")
+val cardScale by transition.animateFloat(label = "scale") { if (it) 1.05f else 1f }
+val cardColor by transition.animateColor(label = "color") {
+    if (it) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+}`,
+
+'anim-cross-q': `// Crossfade — swap between two composables with a fade
+var currentScreen by remember { mutableStateOf("home") }
+
+Crossfade(
+    targetState = currentScreen,
+    animationSpec = tween(300),
+    label = "screen_crossfade"
+) { screen ->
+    when (screen) {
+        "home"    -> HomeScreen()
+        "profile" -> ProfileScreen()
+        "search"  -> SearchScreen()
+    }
+}`,
+'anim-cross-f': `// AnimatedContent — more control: different enter/exit per direction
+var count by remember { mutableStateOf(0) }
+
+AnimatedContent(
+    targetState = count,
+    transitionSpec = {
+        // Slide up when incrementing, slide down when decrementing
+        if (targetState > initialState) {
+            slideInVertically { -it } + fadeIn() togetherWith
+            slideOutVertically { it } + fadeOut()
+        } else {
+            slideInVertically { it } + fadeIn() togetherWith
+            slideOutVertically { -it } + fadeOut()
+        }
+    },
+    label = "counter"
+) { value ->
+    Text("$value", style = MaterialTheme.typography.displayMedium)
+}
+Row {
+    Button(onClick = { count-- }) { Text("-") }
+    Button(onClick = { count++ }) { Text("+") }
+}
+
+// AnimatedContent for loading state transitions
+AnimatedContent(
+    targetState = uiState,
+    transitionSpec = { fadeIn(tween(300)) togetherWith fadeOut(tween(150)) },
+    label = "state_transition"
+) { state ->
+    when (state) {
+        is UiState.Loading -> LoadingSpinner()
+        is UiState.Error   -> ErrorScreen(state.message)
+        is UiState.Success -> ContentScreen(state.data)
+    }
+}
+
+// Modifier.animateContentSize() — animate layout size changes inline
+var expanded by remember { mutableStateOf(false) }
+Card(modifier = Modifier
+    .clickable { expanded = !expanded }
+    .animateContentSize(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+) {
+    Text(
+        text = longText,
+        maxLines = if (expanded) Int.MAX_VALUE else 2,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.padding(16.dp)
+    )
+}`,
+
+'kbd-q': `// Step 1: in Activity — let Compose handle insets
+// WindowCompat.setDecorFitsSystemWindows(window, false)
+
+// Step 2: imePadding() pushes content up when keyboard appears
+Scaffold(
+    modifier = Modifier.imePadding()   // automatically adjusts for keyboard
+) { padding ->
+    Column(modifier = Modifier.padding(padding)) {
+        // your content
+    }
+}
+
+// Detect if keyboard is visible (recomposes on change)
+val isKeyboardVisible = WindowInsets.isImeVisible`,
+'kbd-f': `// Hide UI elements when keyboard is shown
+@Composable
+fun ChatScreen() {
+    val isKeyboardVisible = WindowInsets.isImeVisible
+
+    Scaffold(modifier = Modifier.imePadding()) { padding ->
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+        ) {
+            // Header hides when keyboard is up
+            AnimatedVisibility(
+                visible = !isKeyboardVisible,
+                enter = fadeIn() + expandVertically(),
+                exit  = fadeOut() + shrinkVertically()
+            ) {
+                ChatHeader()
+            }
+
+            // Message list — fills remaining space
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .imeNestedScroll()   // dismiss keyboard by scrolling down
+            ) {
+                items(messages) { msg -> MessageBubble(msg) }
+            }
+
+            // Input bar — always visible, pinned above keyboard
+            MessageInputBar()
+        }
+    }
+}
+
+// Animated resize using animateDpAsState
+@Composable
+fun ProfileScreen() {
+    val isKeyboardVisible = WindowInsets.isImeVisible
+    val avatarSize by animateDpAsState(
+        targetValue = if (isKeyboardVisible) 48.dp else 120.dp,
+        label = "avatar_size"
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Avatar shrinks when keyboard appears
+        Image(
+            painter = painterResource(R.drawable.avatar),
+            contentDescription = null,
+            modifier = Modifier.size(avatarSize).clip(CircleShape)
+        )
+        Spacer(Modifier.height(16.dp))
+        OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Name") })
+        OutlinedTextField(value = bio, onValueChange = { bio = it }, label = { Text("Bio") })
+    }
+}
+
+// FocusRequester — programmatically open keyboard on screen enter
+val focusRequester = remember { FocusRequester() }
+val keyboardController = LocalSoftwareKeyboardController.current
+
+OutlinedTextField(
+    value = query,
+    onValueChange = { query = it },
+    modifier = Modifier.focusRequester(focusRequester)
+)
+LaunchedEffect(Unit) {
+    focusRequester.requestFocus()
+    keyboardController?.show()
+}
+
+// Dismiss keyboard on outside tap
+val focusManager = LocalFocusManager.current
+Box(
+    modifier = Modifier
+        .fillMaxSize()
+        .pointerInput(Unit) {
+            detectTapGestures { focusManager.clearFocus() }
+        }
+) { /* content */ }`,
+
+'remember-q': `// Survives recomposition, NOT config changes
+val count = remember { mutableStateOf(0) }
+
+// remember with key — recalculates when key changes
+val filtered = remember(searchQuery) {
+    allItems.filter { it.name.contains(searchQuery, ignoreCase = true) }
+}
+
+// rememberSaveable — survives config changes & process death
+var text by rememberSaveable { mutableStateOf("") }`,
+
+'mstate-q': `// Style 1: property delegation (recommended)
+var name by remember { mutableStateOf("") }
+name = "Alice"              // setter
+println(name)               // getter
+
+// Style 2: destructuring
+val (count, setCount) = remember { mutableStateOf(0) }`,
+'mstate-f': `// Hoisted state pattern
+@Composable
+fun Counter(count: Int, onIncrement: () -> Unit) {  // stateless
+    Button(onClick = onIncrement) { Text("Count: $count") }
+}
+
+@Composable
+fun CounterScreen() {  // stateful parent
+    var count by remember { mutableStateOf(0) }
+    Counter(count = count, onIncrement = { count++ })
+}
+
+// List state
+val items = remember { mutableStateListOf("A", "B", "C") }
+items.add("D")  // triggers recomposition
+
+// Map state
+val map = remember { mutableStateMapOf<String, Boolean>() }`,
+
+'derived-q': `val scrollState = rememberLazyListState()
+
+// Only recomposes when the boolean result changes
+// (not on every pixel of scrolling)
+val showFab by remember {
+    derivedStateOf { scrollState.firstVisibleItemIndex > 0 }
+}
+
+AnimatedVisibility(visible = showFab) {
+    FloatingActionButton(onClick = {}) { Icon(Icons.Default.ArrowUpward, null) }
+}`,
+
+'le-q': `// Runs once on first composition
+LaunchedEffect(Unit) {
+    viewModel.loadData()
+}
+
+// Re-runs whenever userId changes
+LaunchedEffect(userId) {
+    viewModel.loadUser(userId)
+}`,
+'le-f': `// Show snackbar on error
+val snackbarHostState = remember { SnackbarHostState() }
+
+LaunchedEffect(errorMessage) {
+    errorMessage?.let {
+        snackbarHostState.showSnackbar(it)
+        viewModel.clearError()
+    }
+}
+
+// Collect one-off events (side effects from VM)
+LaunchedEffect(Unit) {
+    viewModel.events.collect { event ->
+        when (event) {
+            is UiEvent.Navigate -> navController.navigate(event.route)
+            is UiEvent.ShowSnackbar -> snackbarHostState.showSnackbar(event.msg)
+        }
+    }
+}
+
+// Multiple keys
+LaunchedEffect(key1 = userId, key2 = refreshTrigger) {
+    loadData(userId)
+}`,
+
+'se-q': `// Runs after EVERY successful recomposition
+// Good for syncing compose state to non-compose systems
+SideEffect {
+    // Update Firebase Analytics user property
+    firebaseAnalytics.setUserProperty("theme", currentTheme)
+    // Update system bar color controller
+    systemUiController.setStatusBarColor(statusBarColor)
+}`,
+
+'de-q': `// Attach a lifecycle observer; remove it when composable leaves
+DisposableEffect(lifecycleOwner) {
+    val observer = LifecycleEventObserver { _, event ->
+        if (event == Lifecycle.Event.ON_RESUME) viewModel.onResume()
+        if (event == Lifecycle.Event.ON_PAUSE)  viewModel.onPause()
+    }
+    lifecycleOwner.lifecycle.addObserver(observer)
+    onDispose {
+        lifecycleOwner.lifecycle.removeObserver(observer)
+    }
+}`,
+'de-f': `// Register a broadcast receiver
+val context = LocalContext.current
+DisposableEffect(context) {
+    val receiver = object : BroadcastReceiver() {
+        override fun onReceive(ctx: Context, intent: Intent) {
+            when (intent.action) {
+                Intent.ACTION_BATTERY_LOW -> showLowBatteryWarning()
+            }
+        }
+    }
+    val filter = IntentFilter(Intent.ACTION_BATTERY_LOW)
+    context.registerReceiver(receiver, filter)
+    onDispose { context.unregisterReceiver(receiver) }
+}
+
+// Key re-runs if receiver type changes
+DisposableEffect(receiverType) {
+    val listener = createListener(receiverType)
+    eventBus.register(listener)
+    onDispose { eventBus.unregister(listener) }
+}`
+};
+
+// ---- Text ----
+CODE['text-q'] = `// Center text horizontally AND vertically
+Text(
+    text = "Hello",
+    textAlign = TextAlign.Center,                        // horizontal, within Text bounds
+    modifier = Modifier
+        .fillMaxWidth()
+        .wrapContentHeight(Alignment.CenterVertically)   // vertical centering
+)`;
+
+CODE['text-f'] = `// Common text styling
+Text(
+    text = "Styled text",
+    color         = MaterialTheme.colorScheme.primary,
+    fontSize      = 20.sp,
+    fontWeight    = FontWeight.Bold,
+    fontStyle     = FontStyle.Italic,
+    letterSpacing = 0.5.sp,
+    lineHeight    = 28.sp,
+    textAlign     = TextAlign.Center,
+    maxLines      = 2,
+    overflow      = TextOverflow.Ellipsis,
+    style         = MaterialTheme.typography.bodyLarge,
+)
+
+// Center inside a fixed-height container
+Box(
+    modifier = Modifier
+        .fillMaxWidth()
+        .height(120.dp)
+        .background(MaterialTheme.colorScheme.surfaceVariant)
+) {
+    Text(
+        text = "Centered",
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight(Alignment.CenterVertically)
+            .align(Alignment.Center),
+        textAlign = TextAlign.Center,
+    )
+}
+
+// Mixed-style inline text with AnnotatedString
+val annotated = buildAnnotatedString {
+    append("Hello ")
+    withStyle(SpanStyle(color = Color.Red, fontWeight = FontWeight.Bold)) {
+        append("World")
+    }
+    append("!")
+}
+Text(text = annotated)
+
+// Long-press selectable text
+SelectionContainer {
+    Text("This text can be selected")
+}`;
+
+// ---- Icons ----
+CODE['icons-q'] = `// Quick snippet — using Material Icons
+Icon(
+    imageVector = Icons.Default.Favorite,
+    contentDescription = "Favorite",
+    tint = MaterialTheme.colorScheme.primary,
+    modifier = Modifier.size(24.dp)
+)
+
+// Outlined / Rounded / Sharp / TwoTone variants
+Icon(Icons.Outlined.Settings, contentDescription = "Settings")
+Icon(Icons.Rounded.Home,      contentDescription = "Home")
+Icon(Icons.Sharp.Delete,      contentDescription = "Delete")
+Icon(Icons.TwoTone.Star,      contentDescription = "Star")`;
+
+CODE['icons-f'] = `// Gradle setup (build.gradle.kts)
+// Core (~150 essential icons, included automatically with material3)
+// implementation("androidx.compose.material:material-icons-core")
+
+// Extended (1 000+ icons — adds ~8 MB, use R8 to shrink)
+// implementation("androidx.compose.material:material-icons-extended")
+
+// Icon inside an IconButton
+IconButton(onClick = { /* ... */ }) {
+    Icon(
+        imageVector = Icons.Default.MoreVert,
+        contentDescription = "More options"
+    )
+}
+
+// Icon with custom tint + size
+Icon(
+    imageVector   = Icons.Filled.CheckCircle,
+    contentDescription = "Done",
+    tint     = Color(0xFF386A20),
+    modifier = Modifier.size(48.dp)
+)
+
+// Load by name at runtime (useful in demos/tests)
+// val icon = Icons.Default::class.members
+//     .filterIsInstance<KProperty0<ImageVector>>()
+//     .firstOrNull { it.name == "Home" }?.get()
+
+// Decorative icon — pass null contentDescription
+Icon(
+    imageVector = Icons.Default.Star,
+    contentDescription = null   // TalkBack will skip this
+)`;
+
+initCode(CODE);
+</script>
+</body>
+</html>

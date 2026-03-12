@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Services – Android Compose Guide</title>
+  <script>(function(){ document.documentElement.dataset.theme = localStorage.getItem('guide-theme') || 'light'; })();</script>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+</head>
+<body data-page="services">
+<div id="nav-container"></div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-heading">Services</div>
+    <a href="#service">Service</a>
+    <a href="#intentservice">IntentService (deprecated)</a>
+    <a href="#boundservice">BoundService</a>
+    <a href="#foreground">ForegroundService</a>
+    <a href="#workmanager">CoroutineWorker / WorkManager</a>
+    <a href="#hilt-worker">Hilt Worker</a>
+  </aside>
+
+  <main class="content">
+    <div class="page-hero">
+      <h1>Services</h1>
+      <p>Background work, bound services, foreground services, and WorkManager.</p>
+    </div>
+
+    <!-- SERVICE -->
+    <div class="subsection" id="service">
+      <div class="sub-header">
+        <h2>Service</h2>
+        <a class="doc-link" href="https://developer.android.com/guide/components/services" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Runs in the main thread by default — spawn a coroutine or thread for actual background work. <code>START_STICKY</code> restarts the service if killed.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-svc-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-svc-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>Return values for onStartCommand:</strong></p>
+            <ul>
+              <li><code>START_STICKY</code> — System restarts service with a null Intent after killing it. Good for music players.</li>
+              <li><code>START_NOT_STICKY</code> — Not restarted after kill. Good for one-off tasks.</li>
+              <li><code>START_REDELIVER_INTENT</code> — Restarted with the original Intent. Good for file downloads.</li>
+            </ul>
+            <p><strong>Modern alternative:</strong> Prefer <code>WorkManager</code> for deferrable work, <code>ForegroundService</code> for user-visible immediate work.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- INTENTSERVICE -->
+    <div class="subsection" id="intentservice">
+      <div class="sub-header">
+        <h2>IntentService <span style="font-size:.75rem;color:var(--error)">(Deprecated API 30)</span></h2>
+        <a class="doc-link" href="https://developer.android.com/reference/android/app/IntentService" target="_blank">📖 Docs</a>
+      </div>
+      <div class="callout deprecated"><strong>Deprecated in API 30.</strong> Use <code>CoroutineWorker</code> (WorkManager) instead. Still asked about in interviews.</div>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns"><button class="btn-sm" onclick="copyCode(this)">Copy</button></div>
+        </div>
+        <pre><code id="code-is-q" class="language-kotlin"></code></pre>
+      </div>
+    </div>
+
+    <!-- BOUND SERVICE -->
+    <div class="subsection" id="boundservice">
+      <div class="sub-header">
+        <h2>BoundService</h2>
+        <a class="doc-link" href="https://developer.android.com/guide/components/bound-services" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Allows components to bind, call methods directly, and receive results. Service stops when the last client unbinds.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-bound-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-bound-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOREGROUND -->
+    <div class="subsection" id="foreground">
+      <div class="sub-header">
+        <h2>ForegroundService</h2>
+        <a class="doc-link" href="https://developer.android.com/guide/components/foreground-services" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Visible to the user via a persistent notification. Won't be killed by the system. Required for long-running user-initiated tasks (media, navigation, file transfer).</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-fg-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-fg-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- WORKMANAGER -->
+    <div class="subsection" id="workmanager">
+      <div class="sub-header">
+        <h2>CoroutineWorker / WorkManager</h2>
+        <a class="doc-link" href="https://developer.android.com/topic/libraries/architecture/workmanager" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Best for deferrable, guaranteed background work (sync, uploads, cleanup). Survives process death, device reboots, and respects constraints.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-wm-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-wm-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- HILT WORKER -->
+    <div class="subsection" id="hilt-worker">
+      <div class="sub-header">
+        <h2>Hilt Worker</h2>
+        <a class="doc-link" href="https://developer.android.com/training/dependency-injection/hilt-jetpack#workmanager" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Inject dependencies into WorkManager workers via <code>@HiltWorker</code> + <code>@AssistedInject</code>. Requires a custom <code>HiltWorkerFactory</code>.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-hw-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-hw-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const CODE = {
+'svc-q': `class DataSyncService : Service() {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        scope.launch {
+            syncData()
+            stopSelf()   // stop when done
+        }
+        return START_NOT_STICKY
+    }
+
+    override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onDestroy() { scope.cancel(); super.onDestroy() }
+}`,
+'svc-f': `// Start the service
+val intent = Intent(this, DataSyncService::class.java)
+intent.putExtra("userId", userId)
+startService(intent)   // or startForegroundService() for foreground
+
+// Stop from outside
+stopService(Intent(this, DataSyncService::class.java))
+
+// START_STICKY example (music player, won't stop on kill)
+override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    when (intent?.action) {
+        ACTION_PLAY  -> player.play()
+        ACTION_PAUSE -> player.pause()
+        ACTION_STOP  -> { player.stop(); stopSelf() }
+    }
+    return START_STICKY   // system restarts with null intent if killed
+}`,
+
+'is-q': `// DEPRECATED — shown for interview reference only
+class LegacyIntentService : IntentService("LegacyService") {
+    override fun onHandleIntent(intent: Intent?) {
+        // Automatically runs on a background thread
+        // Service stops itself when onHandleIntent returns
+        val data = intent?.getStringExtra("data") ?: return
+        processData(data)
+    }
+}
+
+// Modern replacement: CoroutineWorker in WorkManager`,
+
+'bound-q': `class MusicService : Service() {
+    private val binder = LocalBinder()
+
+    inner class LocalBinder : Binder() {
+        fun getService(): MusicService = this@MusicService
+    }
+
+    override fun onBind(intent: Intent): IBinder = binder
+
+    fun play(track: Track) { /* … */ }
+    fun getCurrentTrack(): Track? = currentTrack
+}`,
+'bound-f': `// Client side — bind and interact
+class PlayerActivity : AppCompatActivity() {
+    private var musicService: MusicService? = null
+    private var isBound = false
+
+    private val connection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName, binder: IBinder) {
+            musicService = (binder as MusicService.LocalBinder).getService()
+            isBound = true
+        }
+        override fun onServiceDisconnected(name: ComponentName) {
+            musicService = null
+            isBound = false
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        bindService(Intent(this, MusicService::class.java), connection, Context.BIND_AUTO_CREATE)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (isBound) { unbindService(connection); isBound = false }
+    }
+
+    fun onPlayClicked() { musicService?.play(selectedTrack) }
+}`,
+
+'fg-q': `class DownloadService : Service() {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val notification = buildNotification("Downloading…")
+        startForeground(NOTIFICATION_ID, notification)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            downloadFile()
+            stopSelf()
+        }
+        return START_NOT_STICKY
+    }
+
+    override fun onBind(intent: Intent?): IBinder? = null
+}`,
+'fg-f': `class DownloadService : Service() {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    override fun onCreate() {
+        super.onCreate()
+        createNotificationChannel()
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val url = intent?.getStringExtra("url") ?: return START_NOT_STICKY
+
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("Downloading")
+            .setContentText("Starting…")
+            .setSmallIcon(R.drawable.ic_download)
+            .setOngoing(true)
+            .build()
+
+        startForeground(1, notification)
+
+        scope.launch {
+            download(url) { progress ->
+                // Update notification
+                val updated = NotificationCompat.Builder(this@DownloadService, CHANNEL_ID)
+                    .setContentTitle("Downloading")
+                    .setProgress(100, progress, false)
+                    .setSmallIcon(R.drawable.ic_download)
+                    .setOngoing(true)
+                    .build()
+                notificationManager.notify(1, updated)
+            }
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            stopSelf()
+        }
+        return START_NOT_STICKY
+    }
+
+    override fun onDestroy() { scope.cancel(); super.onDestroy() }
+    override fun onBind(intent: Intent?): IBinder? = null
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(CHANNEL_ID, "Downloads", NotificationManager.IMPORTANCE_LOW)
+            getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+        }
+    }
+
+    companion object {
+        const val CHANNEL_ID = "download_channel"
+    }
+}`,
+
+'wm-q': `class SyncWorker(
+    context: Context,
+    params: WorkerParameters
+) : CoroutineWorker(context, params) {
+
+    override suspend fun doWork(): Result {
+        val userId = inputData.getString("userId") ?: return Result.failure()
+        return try {
+            syncUserData(userId)
+            Result.success(workDataOf("synced" to true))
+        } catch (e: Exception) {
+            if (runAttemptCount < 3) Result.retry() else Result.failure()
+        }
+    }
+}`,
+'wm-f': `// One-time work
+val request = OneTimeWorkRequestBuilder<SyncWorker>()
+    .setInputData(workDataOf("userId" to "abc123"))
+    .setConstraints(
+        Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresStorageNotLow(true)
+            .build()
+    )
+    .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.SECONDS)
+    .addTag("sync")
+    .build()
+
+WorkManager.getInstance(context).enqueue(request)
+
+// Periodic work (at most once every 15 minutes)
+val periodicRequest = PeriodicWorkRequestBuilder<SyncWorker>(1, TimeUnit.HOURS)
+    .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
+    .build()
+
+WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+    "periodic_sync",
+    ExistingPeriodicWorkPolicy.KEEP,  // don't replace if already scheduled
+    periodicRequest
+)
+
+// Observe progress in ViewModel
+workManager.getWorkInfosByTagLiveData("sync")
+    .observe(this) { workInfos ->
+        val running = workInfos.any { it.state == WorkInfo.State.RUNNING }
+    }
+
+// Chain workers
+WorkManager.getInstance(context)
+    .beginWith(OneTimeWorkRequestBuilder<CleanupWorker>().build())
+    .then(OneTimeWorkRequestBuilder<SyncWorker>().build())
+    .then(OneTimeWorkRequestBuilder<NotifyWorker>().build())
+    .enqueue()`,
+
+'hw-q': `@HiltWorker
+class SyncWorker @AssistedInject constructor(
+    @Assisted context: Context,
+    @Assisted params: WorkerParameters,
+    private val repository: SyncRepository   // injected by Hilt
+) : CoroutineWorker(context, params) {
+
+    override suspend fun doWork(): Result {
+        repository.sync()
+        return Result.success()
+    }
+}`,
+'hw-f': `// Application must implement Configuration.Provider
+@HiltAndroidApp
+class MyApp : Application(), Configuration.Provider {
+
+    @Inject lateinit var workerFactory: HiltWorkerFactory
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
+}
+
+// Disable default WorkManager initializer in Manifest:
+// <provider
+//     android:name="androidx.startup.InitializationProvider"
+//     android:authorities="\${applicationId}.androidx-startup"
+//     android:exported="false"
+//     tools:node="remove" />
+
+// Schedule as usual — factory handles the injection
+val request = OneTimeWorkRequestBuilder<SyncWorker>().build()
+WorkManager.getInstance(context).enqueue(request)
+
+// Without Hilt — pass deps via inputData (limited to primitives)
+// or use a custom WorkerFactory:
+class MyWorkerFactory(private val repo: SyncRepository) : WorkerFactory() {
+    override fun createWorker(
+        appContext: Context, workerClassName: String, workerParameters: WorkerParameters
+    ): ListenableWorker? {
+        return if (workerClassName == SyncWorker::class.java.name)
+            SyncWorker(appContext, workerParameters, repo)
+        else null
+    }
+}`
+};
+
+initCode(CODE);
+</script>
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design Patterns – Android Compose Guide</title>
+  <script>(function(){ document.documentElement.dataset.theme = localStorage.getItem('guide-theme') || 'light'; })();</script>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+</head>
+<body data-page="patterns">
+<div id="nav-container"></div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-heading">Design Patterns</div>
+    <a href="#mvvm">MVVM</a>
+    <a href="#mvi">MVI</a>
+    <a href="#comparison">MVVM vs MVI</a>
+  </aside>
+
+  <main class="content">
+    <div class="page-hero">
+      <h1>Design Patterns</h1>
+      <p>MVVM and MVI architecture patterns — when to use each and full examples.</p>
+    </div>
+
+    <!-- MVVM -->
+    <div class="subsection" id="mvvm">
+      <div class="sub-header">
+        <h2>MVVM</h2>
+        <a class="doc-link" href="https://developer.android.com/topic/architecture" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Model-View-ViewModel. The ViewModel exposes observable state; the View observes and renders. The Model (Repository) handles data.</p>
+      <div class="callout info">
+        <strong>Architecture diagram:</strong><br>
+        <pre style="margin:8px 0 0;font-size:.8rem;background:none;padding:0">View (Composable)
+  ↕ observes StateFlow
+ViewModel
+  ↕ calls suspend functions / collects Flow
+Repository
+  ↕
+Remote (Retrofit) + Local (Room)</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin — MVVM</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-mvvm-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-mvvm-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>Key MVVM rules:</strong></p>
+            <ul>
+              <li>View knows about ViewModel, not vice versa.</li>
+              <li>ViewModel knows about Repository, not View or Context.</li>
+              <li>Repository is the single source of truth — decides whether to fetch remote or return cached data.</li>
+            </ul>
+            <p><strong>Multiple UI state variables vs single state class:</strong> For complex screens, prefer a single <code>data class UiState(...)</code> with <code>_state.update { it.copy(...) }</code>. Simpler screens can use individual StateFlows.</p>
+            <p><strong>ViewModels and Context:</strong> Never pass an Activity context to a ViewModel — it will outlive the Activity. Use <code>@ApplicationContext</code> via Hilt if you need context.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- MVI -->
+    <div class="subsection" id="mvi">
+      <div class="sub-header">
+        <h2>MVI</h2>
+      </div>
+      <p class="sub-desc">Model-View-Intent. All user actions are sealed class Intents. A single immutable State is the only source of truth. State transitions are predictable and testable.</p>
+      <div class="callout info">
+        <strong>Architecture diagram:</strong><br>
+        <pre style="margin:8px 0 0;font-size:.8rem;background:none;padding:0">View (Composable)
+  → dispatches Intent (user actions)
+ViewModel.processIntent()
+  → produces new State (immutable copy)
+  → (optionally) emits one-off Effect (navigate, snackbar)
+View
+  ← renders State</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin — MVI</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-mvi-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-mvi-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>Intent (Action) naming:</strong> Name intents as user actions: <code>LoadUsers</code>, <code>SearchQuery(query)</code>, <code>DeleteUser(id)</code>, <code>RetryClicked</code>.</p>
+            <p><strong>Effect / SideEffect:</strong> One-off events that shouldn't be replayed on config change (navigate, show toast). Use a <code>Channel</code> or <code>SharedFlow(replay=0)</code>.</p>
+            <p><strong>State must be immutable:</strong> Use <code>data class</code> with <code>.copy()</code>. Never mutate state directly.</p>
+            <p><strong>Testability:</strong> MVI shines here — given an Intent, assert the output State. No need to mock UI interactions.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- COMPARISON -->
+    <div class="subsection" id="comparison">
+      <div class="sub-header">
+        <h2>MVVM vs MVI</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Aspect</th><th>MVVM</th><th>MVI</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>State management</td><td>Multiple StateFlows or one state class</td><td>Single immutable state class</td></tr>
+            <tr><td>User actions</td><td>Direct function calls on ViewModel</td><td>Sealed Intent class dispatched to ViewModel</td></tr>
+            <tr><td>Complexity</td><td>Lower — simpler to get started</td><td>Higher upfront — but scales well</td></tr>
+            <tr><td>Testability</td><td>Good — mock repositories</td><td>Excellent — pure state machine</td></tr>
+            <tr><td>One-off events</td><td>SharedFlow or Channel</td><td>Effect / SideEffect channel</td></tr>
+            <tr><td>Debugging</td><td>Standard</td><td>Easy — log every Intent → State transition</td></tr>
+            <tr><td>Best for</td><td>Most apps, simple to medium complexity</td><td>Complex screens, team projects, high testability</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout tip">
+        <strong>Interview tip:</strong> Both patterns use a ViewModel and Repository. The key difference is how state is managed and how the View communicates with the ViewModel. In MVVM, the View calls functions directly (<code>vm.loadUsers()</code>). In MVI, the View sends typed intents (<code>vm.dispatch(Intent.LoadUsers)</code>).
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const CODE = {
+'mvvm-q': `// ViewModel
+@HiltViewModel
+class UserViewModel @Inject constructor(private val repo: UserRepository) : ViewModel() {
+
+    private val _state = MutableStateFlow(UserUiState())
+    val state: StateFlow<UserUiState> = _state.asStateFlow()
+
+    init { loadUsers() }
+
+    fun loadUsers() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            try {
+                repo.getUsers().collect { users ->
+                    _state.update { it.copy(users = users, isLoading = false) }
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(error = e.message, isLoading = false) }
+            }
+        }
+    }
+}
+
+data class UserUiState(
+    val users: List<User> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: String? = null
+)`,
+'mvvm-f': `// Repository (Model layer)
+class UserRepository @Inject constructor(
+    private val api: ApiService,
+    private val db: UserDao
+) {
+    fun getUsers(): Flow<List<User>> = db.getAllUsers()      // Room emits on DB changes
+
+    suspend fun refreshUsers() {
+        val users = api.fetchUsers()
+        db.insertAll(users)
+    }
+}
+
+// Composable (View)
+@Composable
+fun UserListScreen(viewModel: UserViewModel = hiltViewModel()) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    Scaffold { padding ->
+        when {
+            state.isLoading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+                CircularProgressIndicator()
+            }
+            state.error != null -> ErrorScreen(state.error!!, onRetry = viewModel::loadUsers)
+            else -> LazyColumn(contentPadding = padding) {
+                items(state.users, key = { it.id }) { user ->
+                    UserItem(user)
+                }
+            }
+        }
+    }
+}`,
+
+'mvi-q': `// Intent — all possible user actions
+sealed class UserIntent {
+    data object LoadUsers : UserIntent()
+    data class Search(val query: String) : UserIntent()
+    data class DeleteUser(val id: String) : UserIntent()
+    data object Retry : UserIntent()
+}
+
+// State — single immutable snapshot
+data class UserState(
+    val users: List<User> = emptyList(),
+    val filteredUsers: List<User> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val searchQuery: String = ""
+)`,
+'mvi-f': `// Effect — one-off events not tied to state
+sealed class UserEffect {
+    data class ShowSnackbar(val message: String) : UserEffect()
+    data class NavigateTo(val route: String) : UserEffect()
+}
+
+// ViewModel — pure intent → state reducer
+@HiltViewModel
+class UserViewModel @Inject constructor(private val repo: UserRepository) : ViewModel() {
+
+    private val _state = MutableStateFlow(UserState())
+    val state: StateFlow<UserState> = _state.asStateFlow()
+
+    private val _effects = Channel<UserEffect>(Channel.BUFFERED)
+    val effects = _effects.receiveAsFlow()
+
+    fun dispatch(intent: UserIntent) {
+        when (intent) {
+            is UserIntent.LoadUsers   -> loadUsers()
+            is UserIntent.Search      -> search(intent.query)
+            is UserIntent.DeleteUser  -> deleteUser(intent.id)
+            is UserIntent.Retry       -> loadUsers()
+        }
+    }
+
+    private fun loadUsers() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+            try {
+                repo.getUsers().collect { users ->
+                    _state.update { it.copy(users = users, filteredUsers = users, isLoading = false) }
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    private fun search(query: String) {
+        _state.update { s ->
+            s.copy(
+                searchQuery = query,
+                filteredUsers = if (query.isEmpty()) s.users
+                    else s.users.filter { it.name.contains(query, ignoreCase = true) }
+            )
+        }
+    }
+
+    private fun deleteUser(id: String) {
+        viewModelScope.launch {
+            try {
+                repo.delete(id)
+                _effects.send(UserEffect.ShowSnackbar("User deleted"))
+            } catch (e: Exception) {
+                _effects.send(UserEffect.ShowSnackbar("Failed to delete"))
+            }
+        }
+    }
+}
+
+// Composable
+@Composable
+fun UserScreen(vm: UserViewModel = hiltViewModel()) {
+    val state by vm.state.collectAsStateWithLifecycle()
+    val snackbarState = remember { SnackbarHostState() }
+
+    // Collect one-off effects
+    LaunchedEffect(Unit) {
+        vm.effects.collect { effect ->
+            when (effect) {
+                is UserEffect.ShowSnackbar -> snackbarState.showSnackbar(effect.message)
+                is UserEffect.NavigateTo  -> navController.navigate(effect.route)
+            }
+        }
+    }
+
+    // Trigger load on entry
+    LaunchedEffect(Unit) { vm.dispatch(UserIntent.LoadUsers) }
+
+    Scaffold(snackbarHost = { SnackbarHost(snackbarState) }) { padding ->
+        Column(modifier = Modifier.padding(padding)) {
+            SearchBar(
+                query = state.searchQuery,
+                onQueryChange = { vm.dispatch(UserIntent.Search(it)) }
+            )
+            when {
+                state.isLoading -> CircularProgressIndicator()
+                state.error != null -> RetryButton(onClick = { vm.dispatch(UserIntent.Retry) })
+                else -> LazyColumn {
+                    items(state.filteredUsers, key = { it.id }) { user ->
+                        UserItem(user, onDelete = { vm.dispatch(UserIntent.DeleteUser(user.id)) })
+                    }
+                }
+            }
+        }
+    }
+}`
+};
+
+initCode(CODE);
+</script>
+</body>
+</html>

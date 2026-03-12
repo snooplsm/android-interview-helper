@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Storage – Android Compose Guide</title>
+  <script>(function(){ document.documentElement.dataset.theme = localStorage.getItem('guide-theme') || 'light'; })();</script>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+</head>
+<body data-page="storage">
+<div id="nav-container"></div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-heading">Storage</div>
+    <a href="#serialization">Kotlinx Serialization</a>
+    <a href="#datastore">DataStore Preferences</a>
+    <a href="#proto-datastore">Proto DataStore</a>
+    <a href="#sharedprefs">SharedPreferences</a>
+    <a href="#storage-di">With / Without Hilt</a>
+  </aside>
+
+  <main class="content">
+    <div class="page-hero">
+      <h1>Storage</h1>
+      <p>Serialization, DataStore, SharedPreferences — modern and legacy approaches.</p>
+    </div>
+
+    <!-- SERIALIZATION -->
+    <div class="subsection" id="serialization">
+      <div class="sub-header">
+        <h2>Kotlinx Serialization</h2>
+        <a class="doc-link" href="https://kotlinlang.org/docs/serialization.html" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Kotlin-native JSON (de)serialization. Compile-time safe. Works with Retrofit, DataStore proto, and file I/O.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-serial-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-serial-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- DATASTORE -->
+    <div class="subsection" id="datastore">
+      <div class="sub-header">
+        <h2>DataStore Preferences</h2>
+        <a class="doc-link" href="https://developer.android.com/topic/libraries/architecture/datastore" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Async, coroutine-based replacement for SharedPreferences. Runs on a background thread. Exposes data as <code>Flow</code>.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-ds-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-ds-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>DataStore vs SharedPreferences:</strong> SharedPreferences runs synchronously (can block UI) and is not safe for complex concurrent access. DataStore is always async via coroutines and is concurrency-safe.</p>
+            <p><strong>Keys are typed:</strong> <code>intPreferencesKey</code>, <code>stringPreferencesKey</code>, <code>booleanPreferencesKey</code>, <code>floatPreferencesKey</code>, <code>longPreferencesKey</code>, <code>stringSetPreferencesKey</code>.</p>
+            <p><strong>Default value:</strong> If a key doesn't exist, <code>data.map { prefs[KEY] }</code> returns <code>null</code>. Use <code>?: defaultValue</code> or <code>data.map { prefs[KEY] ?: default }</code>.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- PROTO DATASTORE -->
+    <div class="subsection" id="proto-datastore">
+      <div class="sub-header">
+        <h2>Proto DataStore</h2>
+        <a class="doc-link" href="https://developer.android.com/topic/libraries/architecture/datastore#proto-datastore" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Type-safe DataStore using Protocol Buffers. Define schema in a <code>.proto</code> file — no stringly-typed keys. Better for complex structured data.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-proto-q" class="language-kotlin"></code></pre>
+      </div>
+    </div>
+
+    <!-- SHAREDPREFS -->
+    <div class="subsection" id="sharedprefs">
+      <div class="sub-header">
+        <h2>SharedPreferences</h2>
+        <a class="doc-link" href="https://developer.android.com/training/data-storage/shared-preferences" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Legacy key-value store. Synchronous. Avoid for new code — use DataStore instead. Still appears in interviews and older codebases.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-sp-q" class="language-kotlin"></code></pre>
+      </div>
+    </div>
+
+    <!-- WITH / WITHOUT HILT -->
+    <div class="subsection" id="storage-di">
+      <div class="sub-header">
+        <h2>With / Without Hilt</h2>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin — With Hilt</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-hilt-ds-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-hilt-ds-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+      <div class="code-card" style="margin-top:12px">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin — Without Hilt</span>
+          <div class="code-btns"><button class="btn-sm" onclick="copyCode(this)">Copy</button></div>
+        </div>
+        <pre><code id="code-nohilt-ds-q" class="language-kotlin"></code></pre>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const CODE = {
+'serial-q': `@Serializable
+data class User(
+    val id: Int,
+    val name: String,
+    @SerialName("email_address") val email: String,
+    val role: String = "user"  // optional with default
+)
+
+val json = Json { ignoreUnknownKeys = true; isLenient = true }
+val user = json.decodeFromString<User>(jsonString)
+val jsonStr = json.encodeToString(user)`,
+'serial-f': `// Gradle setup
+// plugins { kotlin("plugin.serialization") version "1.9.22" }
+// implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+// implementation("com.squareup.retrofit2:converter-kotlinx-serialization:2.9.0")
+
+// Sealed classes
+@Serializable
+sealed class Shape {
+    @Serializable @SerialName("circle")
+    data class Circle(val radius: Double) : Shape()
+    @Serializable @SerialName("rect")
+    data class Rect(val w: Double, val h: Double) : Shape()
+}
+
+// List
+val users = json.decodeFromString<List<User>>(jsonArrayString)
+
+// With Retrofit
+val retrofit = Retrofit.Builder()
+    .baseUrl(BASE_URL)
+    .addConverterFactory(
+        Json { ignoreUnknownKeys = true }.asConverterFactory("application/json".toMediaType())
+    )
+    .build()
+
+// Polymorphic serialization
+val json = Json { serializersModule = SerializersModule {
+    polymorphic(Shape::class) {
+        subclass(Shape.Circle::class)
+        subclass(Shape.Rect::class)
+    }
+}}`,
+
+'ds-q': `// Create DataStore (top-level extension)
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+
+// Keys
+val DARK_THEME_KEY = booleanPreferencesKey("dark_theme")
+val USERNAME_KEY   = stringPreferencesKey("username")
+
+// Read — returns Flow
+val darkTheme: Flow<Boolean> = context.dataStore.data
+    .map { prefs -> prefs[DARK_THEME_KEY] ?: false }
+
+// Write
+suspend fun setDarkTheme(enabled: Boolean) {
+    context.dataStore.edit { prefs -> prefs[DARK_THEME_KEY] = enabled }
+}`,
+'ds-f': `// Repository wrapping DataStore
+class SettingsRepository(private val dataStore: DataStore<Preferences>) {
+
+    val darkTheme: Flow<Boolean> = dataStore.data
+        .catch { emit(emptyPreferences()) }  // handle IOException
+        .map { it[DARK_THEME_KEY] ?: false }
+
+    val username: Flow<String> = dataStore.data
+        .map { it[USERNAME_KEY] ?: "" }
+
+    suspend fun updateDarkTheme(enabled: Boolean) {
+        dataStore.edit { it[DARK_THEME_KEY] = enabled }
+    }
+
+    suspend fun updateUsername(name: String) {
+        dataStore.edit { it[USERNAME_KEY] = name }
+    }
+
+    suspend fun clearAll() {
+        dataStore.edit { it.clear() }
+    }
+
+    companion object {
+        val DARK_THEME_KEY = booleanPreferencesKey("dark_theme")
+        val USERNAME_KEY   = stringPreferencesKey("username")
+        val FONT_SIZE_KEY  = floatPreferencesKey("font_size")
+        val TAGS_KEY       = stringSetPreferencesKey("tags")
+    }
+}`,
+
+'proto-q': `// 1. Add .proto file: src/main/proto/user_prefs.proto
+// syntax = "proto3";
+// option java_package = "com.example";
+// message UserPrefs { bool dark_theme = 1; string username = 2; }
+
+// 2. Implement Serializer
+object UserPrefsSerializer : Serializer<UserPrefs> {
+    override val defaultValue: UserPrefs = UserPrefs.getDefaultInstance()
+    override suspend fun readFrom(input: InputStream): UserPrefs =
+        UserPrefs.parseFrom(input)
+    override suspend fun writeTo(t: UserPrefs, output: OutputStream) =
+        t.writeTo(output)
+}
+
+// 3. Create DataStore
+val Context.userPrefsDataStore by dataStore(
+    fileName = "user_prefs.pb",
+    serializer = UserPrefsSerializer
+)
+
+// 4. Update (type-safe, no string keys)
+context.userPrefsDataStore.updateData { current ->
+    current.toBuilder().setDarkTheme(true).build()
+}`,
+
+'sp-q': `val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+
+// Read
+val isDark    = prefs.getBoolean("dark_theme", false)
+val username  = prefs.getString("username", "") ?: ""
+val count     = prefs.getInt("count", 0)
+
+// Write (KTX extension — auto-applies)
+prefs.edit {
+    putBoolean("dark_theme", true)
+    putString("username", "Alice")
+    putInt("count", 42)
+}
+
+// Listen for changes
+val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+    if (key == "dark_theme") updateTheme()
+}
+prefs.registerOnSharedPreferenceChangeListener(listener)`,
+
+'hilt-ds-q': `@Module
+@InstallIn(SingletonComponent::class)
+object DataStoreModule {
+
+    @Provides @Singleton
+    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+        PreferenceDataStoreFactory.create(
+            produceFile = { context.preferencesDataStoreFile("settings") }
+        )
+}`,
+'hilt-ds-f': `// Repository injected with DataStore
+class SettingsRepository @Inject constructor(
+    private val dataStore: DataStore<Preferences>
+) {
+    val darkTheme = dataStore.data.map { it[DARK_THEME_KEY] ?: false }
+
+    suspend fun setDarkTheme(enabled: Boolean) {
+        dataStore.edit { it[DARK_THEME_KEY] = enabled }
+    }
+
+    companion object {
+        val DARK_THEME_KEY = booleanPreferencesKey("dark_theme")
+    }
+}
+
+// ViewModel injected with repository
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
+    private val settings: SettingsRepository
+) : ViewModel() {
+    val darkTheme = settings.darkTheme.stateIn(viewModelScope, WhileSubscribed(5000), false)
+
+    fun toggleDark(enabled: Boolean) {
+        viewModelScope.launch { settings.setDarkTheme(enabled) }
+    }
+}`,
+
+'nohilt-ds-q': `// AppContainer — manual wiring
+class AppContainer(context: Context) {
+    private val dataStore: DataStore<Preferences> =
+        PreferenceDataStoreFactory.create(
+            produceFile = { context.preferencesDataStoreFile("settings") }
+        )
+
+    val settingsRepository = SettingsRepository(dataStore)
+}
+
+class MyApp : Application() {
+    val container by lazy { AppContainer(this) }
+}
+
+// In Activity
+val container = (application as MyApp).container
+val vm = viewModel<SettingsViewModel>(
+    factory = SettingsViewModelFactory(container.settingsRepository)
+)`
+};
+
+initCode(CODE);
+</script>
+</body>
+</html>

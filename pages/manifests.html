@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manifests – Android Compose Guide</title>
+  <script>(function(){ document.documentElement.dataset.theme = localStorage.getItem('guide-theme') || 'light'; })();</script>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+</head>
+<body data-page="manifests">
+<div id="nav-container"></div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-heading">Manifests</div>
+    <a href="#permissions">Permissions</a>
+    <a href="#application">Application Tag</a>
+    <a href="#activity">Activity</a>
+    <a href="#service-tag">Service</a>
+    <a href="#receiver-provider">Receiver &amp; Provider</a>
+    <a href="#deeplinks">Deep Links</a>
+  </aside>
+
+  <main class="content">
+    <div class="page-hero">
+      <h1>AndroidManifest.xml</h1>
+      <p>Permissions, component declarations, exported flags, and deep links.</p>
+    </div>
+
+    <!-- PERMISSIONS -->
+    <div class="subsection" id="permissions">
+      <div class="sub-header">
+        <h2>Permissions</h2>
+        <a class="doc-link" href="https://developer.android.com/guide/topics/manifest/manifest-intro#perms" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Normal permissions are auto-granted at install time. Dangerous permissions require a runtime request AND a manifest declaration.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">XML</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-perms-q" class="language-xml"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-perms-f" class="language-xml"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- APPLICATION -->
+    <div class="subsection" id="application">
+      <div class="sub-header">
+        <h2>Application Tag</h2>
+        <a class="doc-link" href="https://developer.android.com/guide/topics/manifest/application-element" target="_blank">📖 Docs</a>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">XML</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-app-q" class="language-xml"></code></pre>
+      </div>
+    </div>
+
+    <!-- ACTIVITY -->
+    <div class="subsection" id="activity">
+      <div class="sub-header">
+        <h2>Activity</h2>
+        <a class="doc-link" href="https://developer.android.com/guide/topics/manifest/activity-element" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc"><code>android:exported</code> must be explicitly set (required since API 31). Set to <code>true</code> only if the Activity should be reachable from other apps or the launcher.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">XML</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-act-q" class="language-xml"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-act-f" class="language-xml"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- SERVICE TAG -->
+    <div class="subsection" id="service-tag">
+      <div class="sub-header">
+        <h2>Service</h2>
+        <a class="doc-link" href="https://developer.android.com/guide/topics/manifest/service-element" target="_blank">📖 Docs</a>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">XML</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-svc-q" class="language-xml"></code></pre>
+      </div>
+    </div>
+
+    <!-- RECEIVER & PROVIDER -->
+    <div class="subsection" id="receiver-provider">
+      <div class="sub-header">
+        <h2>Receiver &amp; Provider</h2>
+        <a class="doc-link" href="https://developer.android.com/guide/topics/manifest/receiver-element" target="_blank">📖 Docs</a>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">XML</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-recv-q" class="language-xml"></code></pre>
+      </div>
+    </div>
+
+    <!-- DEEP LINKS -->
+    <div class="subsection" id="deeplinks">
+      <div class="sub-header">
+        <h2>Deep Links</h2>
+        <a class="doc-link" href="https://developer.android.com/training/app-links/deep-linking" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Use <code>android:autoVerify="true"</code> for Verified App Links (HTTPS deep links that don't show a disambiguation dialog).</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">XML</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-deep-q" class="language-xml"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-deep-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const CODE = {
+'perms-q': `<!-- Normal permissions (auto-granted at install) -->
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+<uses-permission android:name="android.permission.VIBRATE" />
+
+<!-- Dangerous permissions (require runtime request) -->
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.RECORD_AUDIO" />`,
+'perms-f': `<!-- Scoped storage (API 33+) -->
+<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+<uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+<uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+
+<!-- Legacy storage permission — only needed below API 33 -->
+<uses-permission
+    android:name="android.permission.READ_EXTERNAL_STORAGE"
+    android:maxSdkVersion="32" />
+
+<!-- Foreground service permission (required API 28+) -->
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+
+<!-- Exact alarms (API 31+) -->
+<uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
+<!-- Post notifications (required API 33+) -->
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+<!-- Device features (optional vs required) -->
+<uses-feature android:name="android.hardware.camera" android:required="false" />`,
+
+'app-q': `<application
+    android:name=".MyApp"
+    android:icon="@mipmap/ic_launcher"
+    android:label="@string/app_name"
+    android:theme="@style/Theme.App"
+    android:supportsRtl="true"
+    android:allowBackup="true"
+    android:fullBackupContent="@xml/backup_rules"
+    android:dataExtractionRules="@xml/data_extraction_rules"
+    android:networkSecurityConfig="@xml/network_security_config">
+
+    <!-- components go here -->
+
+</application>`,
+
+'act-q': `<!-- Launcher Activity -->
+<activity
+    android:name=".MainActivity"
+    android:exported="true"
+    android:windowSoftInputMode="adjustResize"
+    android:screenOrientation="portrait">
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+    </intent-filter>
+</activity>`,
+'act-f': `<!-- Internal Activity (not exported) -->
+<activity
+    android:name=".DetailActivity"
+    android:exported="false"
+    android:parentActivityName=".MainActivity">
+    <meta-data
+        android:name="android.support.PARENT_ACTIVITY"
+        android:value=".MainActivity" />
+</activity>
+
+<!-- launchMode options -->
+<activity
+    android:name=".SingleTopActivity"
+    android:launchMode="singleTop"
+    android:exported="false" />
+<!-- standard | singleTop | singleTask | singleInstance -->
+
+<!-- configChanges — handle manually instead of recreating -->
+<activity
+    android:name=".VideoActivity"
+    android:exported="false"
+    android:configChanges="orientation|screenSize|keyboardHidden" />`,
+
+'svc-q': `<!-- Basic background service -->
+<service
+    android:name=".MyService"
+    android:exported="false" />
+
+<!-- Foreground service — must declare type (API 29+) -->
+<service
+    android:name=".LocationForegroundService"
+    android:exported="false"
+    android:foregroundServiceType="location" />
+
+<!-- foregroundServiceType values: -->
+<!-- camera | connectedDevice | dataSync | health -->
+<!-- location | mediaPlayback | mediaProjection | microphone | phoneCall | shortService | specialUse | systemExempted -->
+
+<!-- WorkManager — disable default initializer if using Hilt -->
+<provider
+    android:name="androidx.startup.InitializationProvider"
+    android:authorities="\${applicationId}.androidx-startup"
+    android:exported="false"
+    tools:node="remove" />`,
+
+'recv-q': `<!-- BroadcastReceiver -->
+<receiver
+    android:name=".BootReceiver"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED" />
+    </intent-filter>
+</receiver>
+
+<!-- ContentProvider -->
+<provider
+    android:name=".MyFileProvider"
+    android:authorities="\${applicationId}.fileprovider"
+    android:exported="false"
+    android:grantUriPermissions="true">
+    <meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/file_paths" />
+</provider>`,
+
+'deep-q': `<!-- App Links (HTTPS — verified, no disambiguation) -->
+<activity android:name=".ProductActivity" android:exported="true">
+    <intent-filter android:autoVerify="true">
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="https" android:host="shop.example.com" />
+    </intent-filter>
+</activity>`,
+'deep-f': `// Handle deep link in Compose NavHost
+NavHost(navController = navController, startDestination = "home") {
+    composable(
+        route = "product/{productId}",
+        deepLinks = listOf(navDeepLink {
+            uriPattern = "https://shop.example.com/product/{productId}"
+        })
+    ) { backStackEntry ->
+        val productId = backStackEntry.arguments?.getString("productId")
+        ProductScreen(productId = productId)
+    }
+}
+
+// Handle intent manually in Activity (old approach)
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    val uri = intent?.data
+    val productId = uri?.lastPathSegment
+}`
+};
+
+initCode(CODE);
+</script>
+</body>
+</html>

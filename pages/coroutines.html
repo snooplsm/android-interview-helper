@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coroutines – Android Compose Guide</title>
+  <script>(function(){ document.documentElement.dataset.theme = localStorage.getItem('guide-theme') || 'light'; })();</script>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+</head>
+<body data-page="coroutines">
+<div id="nav-container"></div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-heading">Coroutines</div>
+    <a href="#scopes">Scopes</a>
+    <a href="#launch-async">launch &amp; async</a>
+    <a href="#withcontext">withContext &amp; Dispatchers</a>
+    <a href="#cancellation">Cancellation &amp; Timeout</a>
+    <a href="#error-handling">Error Handling</a>
+  </aside>
+
+  <main class="content">
+    <div class="page-hero">
+      <h1>Coroutines</h1>
+      <p>Structured concurrency, scopes, dispatchers, and error handling.</p>
+    </div>
+
+    <!-- SCOPES -->
+    <div class="subsection" id="scopes">
+      <div class="sub-header">
+        <h2>Scopes</h2>
+        <a class="doc-link" href="https://developer.android.com/kotlin/coroutines" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Every coroutine runs inside a <code>CoroutineScope</code> that defines its lifetime. Android provides lifecycle-aware scopes.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-scopes-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-scopes-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>viewModelScope:</strong> Cancelled in <code>ViewModel.onCleared()</code> — ideal for data loading.</p>
+            <p><strong>lifecycleScope:</strong> Cancelled when the Activity/Fragment is destroyed. Use <code>repeatOnLifecycle</code> for Flow collection so it stops when the app is backgrounded.</p>
+            <p><strong>rememberCoroutineScope (Compose):</strong> Scoped to the composable's lifecycle. Use for user-triggered one-off events (scrolling, snackbars).</p>
+            <p><strong>GlobalScope — avoid:</strong> Not scoped to any lifecycle. Leaked coroutines are a common bug.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- LAUNCH & ASYNC -->
+    <div class="subsection" id="launch-async">
+      <div class="sub-header">
+        <h2>launch &amp; async</h2>
+        <a class="doc-link" href="https://kotlinlang.org/docs/coroutines-basics.html" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc"><code>launch</code> is fire-and-forget (returns <code>Job</code>). <code>async</code> computes a result (returns <code>Deferred</code>, get result with <code>.await()</code>).</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-launch-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-launch-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- WITHCONTEXT -->
+    <div class="subsection" id="withcontext">
+      <div class="sub-header">
+        <h2>withContext &amp; Dispatchers</h2>
+        <a class="doc-link" href="https://kotlinlang.org/docs/coroutine-context-and-dispatchers.html" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Switch the coroutine's thread pool without launching a new coroutine. <code>withContext</code> suspends the current coroutine and resumes on the original dispatcher when done.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-ctx-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-ctx-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>Dispatchers.Main:</strong> Android main thread. Use for UI updates.</p>
+            <p><strong>Dispatchers.IO:</strong> Optimized for blocking I/O (network, disk). Elastic thread pool (up to 64 threads).</p>
+            <p><strong>Dispatchers.Default:</strong> CPU-bound work (sorting, parsing). Thread count = CPU core count.</p>
+            <p><strong>Dispatchers.Unconfined:</strong> Starts in the caller's thread, resumes in whatever thread the last suspend function resumed on. Avoid in production.</p>
+            <p><strong>Best practice in Repository:</strong> Always call <code>withContext(Dispatchers.IO)</code> inside repo functions so callers don't need to know about threading.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- CANCELLATION -->
+    <div class="subsection" id="cancellation">
+      <div class="sub-header">
+        <h2>Cancellation &amp; Timeout</h2>
+        <a class="doc-link" href="https://kotlinlang.org/docs/cancellation-and-timeouts.html" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Cancellation is cooperative — coroutines must check for cancellation at suspension points or explicitly with <code>ensureActive()</code>.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-cancel-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-cancel-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+      <div class="callout tip"><strong>Interview tip:</strong> Cancellation throws <code>CancellationException</code> — never catch it with a broad <code>catch(e: Exception)</code> without re-throwing. Use <code>catch(e: Exception) { if (e is CancellationException) throw e }</code>.</div>
+    </div>
+
+    <!-- ERROR HANDLING -->
+    <div class="subsection" id="error-handling">
+      <div class="sub-header">
+        <h2>Error Handling</h2>
+        <a class="doc-link" href="https://kotlinlang.org/docs/exception-handling.html" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Exceptions in <code>launch</code> propagate to the scope and cancel siblings. Use <code>SupervisorJob</code> or <code>supervisorScope</code> to isolate failures.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-err-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-err-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>CoroutineExceptionHandler:</strong> Only catches uncaught exceptions in root coroutines (launched directly in scope). Does NOT catch exceptions from <code>async</code> — those are exposed via <code>.await()</code>.</p>
+            <p><strong>SupervisorJob:</strong> Child failures don't cancel siblings or the parent. <code>viewModelScope</code> already uses a SupervisorJob internally.</p>
+            <p><strong>supervisorScope vs coroutineScope:</strong> <code>coroutineScope</code> cancels all children on any failure. <code>supervisorScope</code> lets them fail independently — use when fetching multiple independent resources.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const CODE = {
+'scopes-q': `// ViewModel — cancelled in onCleared()
+viewModelScope.launch { fetchData() }
+
+// Activity/Fragment — cancelled on destroy
+lifecycleScope.launch { observeUpdates() }
+
+// Collect flow safely: pauses when backgrounded
+lifecycleScope.launch {
+    repeatOnLifecycle(Lifecycle.State.STARTED) {
+        viewModel.uiState.collect { render(it) }
+    }
+}`,
+'scopes-f': `// Compose — scoped to the composable
+val scope = rememberCoroutineScope()
+Button(onClick = { scope.launch { snackbarHostState.showSnackbar("Done") } }) {
+    Text("Show snackbar")
+}
+
+// Custom scope with SupervisorJob (e.g. in a non-ViewModel class)
+class DataSyncManager {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    fun sync() { scope.launch { performSync() } }
+
+    fun cancel() { scope.cancel() }   // Call this in onDestroy / onCleared
+}
+
+// Custom dispatcher for limiting concurrency
+val limitedDispatcher = Dispatchers.IO.limitedParallelism(4)`,
+
+'launch-q': `// launch — fire and forget
+val job = viewModelScope.launch {
+    repository.saveData(data)
+}
+job.cancel()  // can cancel later
+
+// async — returns a result
+val result = viewModelScope.async { repository.fetchUser(id) }
+val user = result.await()  // suspends until done`,
+'launch-f': `// Parallel execution with async (faster than sequential)
+viewModelScope.launch {
+    val userDeferred = async { userRepo.getUser(id) }
+    val postsDeferred = async { postRepo.getPosts(id) }
+
+    // Both requests run concurrently
+    val user = userDeferred.await()
+    val posts = postsDeferred.await()
+    _uiState.value = UiState(user, posts)
+}
+
+// Sequential vs parallel timing example
+// Sequential (slow): ~2000ms
+val user  = userRepo.getUser(id)    // 1000ms
+val posts = postRepo.getPosts(id)   // 1000ms
+
+// Parallel (fast): ~1000ms
+val (user, posts) = awaitAll(
+    async { userRepo.getUser(id) },
+    async { postRepo.getPosts(id) }
+)
+
+// join — wait for job without caring about result
+val job = launch { heavyWork() }
+job.join()  // suspend until job completes
+println("Done")`,
+
+'ctx-q': `suspend fun loadUser(id: String): User {
+    return withContext(Dispatchers.IO) {   // network/disk
+        api.getUser(id)
+    }
+    // Back on original dispatcher (Main) after withContext
+}`,
+'ctx-f': `// Repository pattern — abstract threading from callers
+class UserRepository(private val api: Api, private val db: Dao) {
+    suspend fun getUser(id: String): User = withContext(Dispatchers.IO) {
+        db.getUser(id) ?: api.fetchUser(id).also { db.insert(it) }
+    }
+
+    suspend fun processData(raw: List<String>): List<Item> = withContext(Dispatchers.Default) {
+        raw.map { parseHeavy(it) }.sortedBy { it.score }
+    }
+}
+
+// Custom dispatcher from thread pool
+val singleThread = newSingleThreadContext("DbWriter")
+
+suspend fun writeToDb(data: Data) = withContext(singleThread) {
+    db.insert(data)  // serialized writes
+}`,
+
+'cancel-q': `val job = viewModelScope.launch {
+    repeat(1000) { i ->
+        ensureActive()           // throws CancellationException if cancelled
+        delay(100)               // also a cancellation point
+        process(i)
+    }
+}
+// Cancel from UI event
+job.cancel()
+
+// Timeout
+val result = withTimeoutOrNull(5_000) {
+    slowNetworkCall()
+} ?: defaultValue   // null if timed out`,
+'cancel-f': `// isActive check in tight loop
+val job = launch(Dispatchers.Default) {
+    while (isActive) {
+        processNextBatch()
+    }
+}
+
+// withTimeout throws TimeoutCancellationException
+try {
+    withTimeout(3_000) { api.call() }
+} catch (e: TimeoutCancellationException) {
+    _state.value = UiState.Error("Request timed out")
+}
+
+// Cleanup on cancellation with finally
+val job = launch {
+    try {
+        longRunningWork()
+    } finally {
+        // Always runs, even on cancellation
+        cleanup()
+    }
+}
+
+// Non-cancellable block (e.g. to save state on cancel)
+launch {
+    try {
+        doWork()
+    } finally {
+        withContext(NonCancellable) {
+            db.save(partialResult)  // this won't be skipped
+        }
+    }
+}`,
+
+'err-q': `// CoroutineExceptionHandler for launch
+val handler = CoroutineExceptionHandler { _, throwable ->
+    _uiState.update { it.copy(error = throwable.message) }
+}
+viewModelScope.launch(handler) {
+    riskyOperation()
+}`,
+'err-f': `// try/catch inside coroutine (preferred for async)
+viewModelScope.launch {
+    _state.update { it.copy(isLoading = true) }
+    try {
+        val data = repository.fetchData()
+        _state.update { it.copy(data = data, isLoading = false) }
+    } catch (e: HttpException) {
+        _state.update { it.copy(error = "Network error: \${e.code()}", isLoading = false) }
+    } catch (e: IOException) {
+        _state.update { it.copy(error = "No connection", isLoading = false) }
+    }
+}
+
+// supervisorScope — children fail independently
+viewModelScope.launch {
+    supervisorScope {
+        val a = async { repo.fetchA() }  // if this throws…
+        val b = async { repo.fetchB() }  // …this still completes
+        println("B = \${b.await()}")      // works even if a failed
+    }
+}
+
+// runCatching — functional style
+val result = runCatching { api.getUser(id) }
+result.onSuccess { user -> _state.update { it.copy(user = user) } }
+result.onFailure { e  -> _state.update { it.copy(error = e.message) } }`
+};
+
+initCode(CODE);
+</script>
+</body>
+</html>

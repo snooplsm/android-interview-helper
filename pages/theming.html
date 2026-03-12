@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theming – Android Compose Guide</title>
+  <script>(function(){ document.documentElement.dataset.theme = localStorage.getItem('guide-theme') || 'light'; })();</script>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+</head>
+<body data-page="theming">
+<div id="nav-container"></div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-heading">Theming</div>
+    <a href="#light-dark">Light &amp; Dark Theme</a>
+    <a href="#custom-colors">Custom Color Attributes</a>
+    <a href="#composition-local">CompositionLocal</a>
+    <a href="#typography">Typography</a>
+  </aside>
+
+  <main class="content">
+    <div class="page-hero">
+      <h1>Theming</h1>
+      <p>Material Design 3 color schemes, custom attributes, and dynamic theming in Compose.</p>
+    </div>
+
+    <!-- LIGHT & DARK -->
+    <div class="subsection" id="light-dark">
+      <div class="sub-header">
+        <h2>Light &amp; Dark Theme</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/designsystems/material3" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Define two <code>ColorScheme</code> objects with <code>lightColorScheme()</code> and <code>darkColorScheme()</code>, then select based on <code>isSystemInDarkTheme()</code>.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-theme-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-theme-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>Dynamic Color (Android 12+):</strong> Use <code>dynamicLightColorScheme(context)</code> and <code>dynamicDarkColorScheme(context)</code> to pull colors from the user's wallpaper.</p>
+            <p><strong>Color roles:</strong> MD3 has 29 color roles. Key ones: <code>primary</code>, <code>onPrimary</code>, <code>primaryContainer</code>, <code>onPrimaryContainer</code>, <code>surface</code>, <code>onSurface</code>, <code>background</code>, <code>error</code>.</p>
+            <p><strong>Access colors anywhere:</strong> <code>MaterialTheme.colorScheme.primary</code></p>
+            <p><strong>Interview tip:</strong> Explain the difference between <code>surface</code> and <code>background</code> — surfaces layer on top of background, used for cards, sheets, etc.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- CUSTOM COLORS -->
+    <div class="subsection" id="custom-colors">
+      <div class="sub-header">
+        <h2>Custom Color Attributes</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/designsystems/custom" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Extend MaterialTheme with your own color tokens using a data class + <code>staticCompositionLocalOf</code>. Supports light/dark variants.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-custom-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-custom-f" class="language-kotlin"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPOSITIONLOCAL -->
+    <div class="subsection" id="composition-local">
+      <div class="sub-header">
+        <h2>CompositionLocal</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/compositionlocal" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Implicit dependency injection through the composition tree. Avoids prop-drilling. Use <code>staticCompositionLocalOf</code> for rarely-changing values and <code>compositionLocalOf</code> for frequently-changing ones.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-cl-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-cl-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>staticCompositionLocalOf:</strong> When the value changes, the <em>entire</em> subtree recomposes. Use for stable objects (colors, typography).</p>
+            <p><strong>compositionLocalOf:</strong> Only composables that <em>read</em> the value recompose when it changes. Use for frequently-changing values (theme mode, locale).</p>
+            <p><strong>Built-in locals:</strong> <code>LocalContext</code>, <code>LocalDensity</code>, <code>LocalConfiguration</code>, <code>LocalLifecycleOwner</code>, <code>LocalFocusManager</code>.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- TYPOGRAPHY -->
+    <div class="subsection" id="typography">
+      <div class="sub-header">
+        <h2>Typography</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/designsystems/material3#typography" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">MD3 typography scale: Display, Headline, Title, Body, Label — each with Large/Medium/Small. Override the default font family and sizes.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-typo-q" class="language-kotlin"></code></pre>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+<script src="../js/main.js"></script>
+<script>
+const CODE = {
+'theme-q': `// Color.kt
+private val LightColors = lightColorScheme(
+    primary    = Color(0xFF6750A4),
+    onPrimary  = Color(0xFFFFFFFF),
+    secondary  = Color(0xFF625B71),
+    surface    = Color(0xFFFFFBFE),
+)
+private val DarkColors = darkColorScheme(
+    primary    = Color(0xFFD0BCFF),
+    onPrimary  = Color(0xFF381E72),
+    secondary  = Color(0xFFCCC2DC),
+    surface    = Color(0xFF1C1B1F),
+)`,
+'theme-f': `// Theme.kt
+@Composable
+fun AppTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = true,       // Android 12+
+    content: @Composable () -> Unit
+) {
+    val colorScheme = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            val context = LocalContext.current
+            if (darkTheme) dynamicDarkColorScheme(context)
+            else dynamicLightColorScheme(context)
+        }
+        darkTheme -> DarkColors
+        else -> LightColors
+    }
+
+    // Tint system bars
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.primary.toArgb()
+            WindowCompat.getInsetsController(window, view)
+                .isAppearanceLightStatusBars = !darkTheme
+        }
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = AppTypography,
+        shapes = AppShapes,
+        content = content
+    )
+}
+
+// Usage in composable
+val primary = MaterialTheme.colorScheme.primary
+val titleStyle = MaterialTheme.typography.titleMedium`,
+
+'custom-q': `@Immutable
+data class ExtendedColors(
+    val success: Color,
+    val warning: Color,
+    val brand: Color,
+)
+
+val LocalExtendedColors = staticCompositionLocalOf {
+    ExtendedColors(Color.Unspecified, Color.Unspecified, Color.Unspecified)
+}`,
+'custom-f': `// Define light + dark variants
+private val LightExtended = ExtendedColors(
+    success = Color(0xFF386A20),
+    warning = Color(0xFF7D5700),
+    brand   = Color(0xFF0061A4),
+)
+private val DarkExtended = ExtendedColors(
+    success = Color(0xFFA8D5A2),
+    warning = Color(0xFFFFBA44),
+    brand   = Color(0xFF9ECAFF),
+)
+
+// Provide in your theme wrapper
+@Composable
+fun AppTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+    val extColors = if (darkTheme) DarkExtended else LightExtended
+
+    CompositionLocalProvider(LocalExtendedColors provides extColors) {
+        MaterialTheme(/* … */, content = content)
+    }
+}
+
+// Convenience accessor — add to your theme object
+object AppTheme {
+    val extColors: ExtendedColors
+        @Composable get() = LocalExtendedColors.current
+}
+
+// Usage
+Text("Success!", color = AppTheme.extColors.success)`,
+
+'cl-q': `// Define a local
+val LocalUser = compositionLocalOf<User?> { null }
+
+// Provide a value (typically near the root)
+CompositionLocalProvider(LocalUser provides currentUser) {
+    // All descendants can read LocalUser.current
+    ProfileScreen()
+}
+
+// Read it anywhere below
+@Composable
+fun ProfileScreen() {
+    val user = LocalUser.current
+    Text(user?.name ?: "Guest")
+}`,
+'cl-f': `// Built-in CompositionLocals
+val context   = LocalContext.current
+val density   = LocalDensity.current
+val config    = LocalConfiguration.current
+val lifecycle = LocalLifecycleOwner.current
+
+// Custom — static (for stable objects like fonts)
+val LocalAppFonts = staticCompositionLocalOf { AppFonts() }
+
+// Custom — dynamic (recomposes only readers when changed)
+val LocalThemeMode = compositionLocalOf { ThemeMode.LIGHT }
+
+// Multiple providers at once
+CompositionLocalProvider(
+    LocalUser provides user,
+    LocalThemeMode provides themeMode,
+    LocalAppFonts provides fonts,
+) {
+    AppContent()
+}
+
+// Override locally in a subtree
+CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.error) {
+    Text("This text is error-colored")
+}`,
+
+'typo-q': `// Type.kt
+val AppTypography = Typography(
+    displayLarge  = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal, fontSize = 57.sp),
+    titleLarge    = TextStyle(fontFamily = Montserrat, fontWeight = FontWeight.SemiBold, fontSize = 22.sp),
+    bodyMedium    = TextStyle(fontFamily = Roboto, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp),
+    labelSmall    = TextStyle(fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 11.sp, letterSpacing = 0.5.sp),
+)
+
+// Usage
+Text("Title", style = MaterialTheme.typography.titleLarge)
+Text("Body text", style = MaterialTheme.typography.bodyMedium)
+
+// Custom font from resources
+val Montserrat = FontFamily(
+    Font(R.font.montserrat_regular, FontWeight.Normal),
+    Font(R.font.montserrat_semibold, FontWeight.SemiBold),
+)`
+};
+
+initCode(CODE);
+</script>
+</body>
+</html>
