@@ -40,7 +40,7 @@ function buildNav() {
     <nav class="top-nav">
       <a class="nav-brand" href="${isRoot ? 'index.html' : '../index.html'}">
         <span class="brand-icon">A</span>
-        <span>Compose Guide</span>
+        
       </a>
       <div class="nav-tabs">${tabsHTML}</div>
       <div class="nav-controls">

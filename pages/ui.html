@@ -28,6 +28,8 @@
     <a href="#textfield-style">Styling TextField</a>
     <a href="#keyboard">Keyboard / IME</a>
     <a href="#animations">Animations</a>
+    <a href="#system-bars">System UI Bars</a>
+    <a href="#stable-immutable">@Stable / @Immutable</a>
     <div class="sidebar-heading" style="margin-top:10px">State &amp; Effects</div>
     <a href="#remember">remember</a>
     <a href="#mutablestate">mutableStateOf</a>
@@ -919,6 +921,91 @@ Image(modifier = Modifier.constrainAs(avatar) {
             </ul>
             <p><strong>updateTransition:</strong> For coordinating multiple animated values that share a single state change. Avoids multiple <code>animate*AsState</code> calls that might drift out of sync.</p>
             <p><strong>rememberInfiniteTransition:</strong> For looping animations (loading shimmer, pulse, breathing effects). Use <code>animateFloat(initialValue, targetValue, infiniteRepeatable(...))</code>.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- SYSTEM UI BARS -->
+    <div class="subsection" id="system-bars">
+      <div class="sub-header">
+        <h2>System UI Bars</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/layouts/insets" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Go edge-to-edge with <code>enableEdgeToEdge()</code> in your Activity, then use <code>WindowInsets</code> padding modifiers so your content doesn't hide under the status bar or nav bar.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-sysbars-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-sysbars-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>enableEdgeToEdge():</strong> Call in <code>Activity.onCreate()</code> before <code>setContent</code>. It sets <code>WindowCompat.setDecorFitsSystemWindows(window, false)</code> and makes the status/nav bars transparent. Available in <code>androidx.activity:activity:1.8+</code>.</p>
+            <p><strong>Inset padding modifiers:</strong></p>
+            <ul>
+              <li><code>Modifier.statusBarsPadding()</code> — adds top padding = status bar height</li>
+              <li><code>Modifier.navigationBarsPadding()</code> — adds bottom/side padding = nav bar size</li>
+              <li><code>Modifier.systemBarsPadding()</code> — both combined</li>
+              <li><code>Modifier.imePadding()</code> — resizes when the soft keyboard appears</li>
+              <li><code>Modifier.displayCutoutPadding()</code> — avoids camera notch/cutout</li>
+              <li><code>Modifier.safeDrawingPadding()</code> — union of all safe areas</li>
+            </ul>
+            <p><strong>WindowInsets directly:</strong> Use <code>WindowInsets.statusBars.asPaddingValues()</code> when you need the raw inset values (e.g. to set a <code>LazyColumn</code> <code>contentPadding</code>).</p>
+            <p><strong>Scaffold + contentWindowInsets:</strong> Pass <code>contentWindowInsets = WindowInsets.Zero</code> to Scaffold if you want to handle insets yourself — Scaffold applies them by default.</p>
+            <p><strong>Status bar icon color:</strong> Light status bar (dark icons) vs dark (light icons) is controlled via <code>WindowInsetsControllerCompat</code>. <code>enableEdgeToEdge()</code> handles this automatically based on your theme.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- STABLE / IMMUTABLE -->
+    <div class="subsection" id="stable-immutable">
+      <div class="sub-header">
+        <h2>@Stable / @Immutable</h2>
+        <a class="doc-link" href="https://developer.android.com/develop/ui/compose/performance/stability" target="_blank">📖 Docs</a>
+      </div>
+      <p class="sub-desc">Stability annotations tell the Compose compiler it can safely skip recomposition for a composable whose inputs haven't changed. Without them, unstable types force every recomposition.</p>
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-lang">Kotlin</span>
+          <div class="code-btns">
+            <button class="btn-sm" onclick="toggleExpand(this)">Show more</button>
+            <button class="btn-sm" onclick="copyCode(this)">Copy</button>
+          </div>
+        </div>
+        <pre><code id="code-stable-q" class="language-kotlin"></code></pre>
+        <div class="code-expanded">
+          <pre><code id="code-stable-f" class="language-kotlin"></code></pre>
+        </div>
+        <details class="deep-dive">
+          <summary>📚 Deep Dive</summary>
+          <div class="deep-content">
+            <p><strong>@Immutable contract:</strong> You promise all public properties are <code>val</code> and their values will never change after construction. The compiler trusts this — violating it causes silent recomposition bugs.</p>
+            <p><strong>@Stable contract:</strong> Weaker — you promise that <code>equals()</code> is consistent and that Compose will be notified (via <code>State</code> reads) if any observed property changes. Safe to use on <code>var</code>-containing classes backed by Snapshot state.</p>
+            <p><strong>When the compiler infers stability automatically:</strong></p>
+            <ul>
+              <li>All primitive types (<code>Int</code>, <code>Boolean</code>, <code>String</code>…)</li>
+              <li><code>data class</code> where every property is a stable type</li>
+              <li>Kotlin lambdas (captured variables must also be stable)</li>
+            </ul>
+            <p><strong>Common unstable types:</strong> <code>List</code>, <code>Map</code>, <code>Set</code> (mutable interface), <code>ArrayList</code>, any class from a non-Compose module the compiler can't inspect.</p>
+            <p><strong>kotlinx.collections.immutable:</strong> Replace <code>List&lt;T&gt;</code> with <code>ImmutableList&lt;T&gt;</code> from <code>kotlinx-collections-immutable</code> — the compiler recognizes these as stable without any annotation.</p>
+            <p><strong>Compose compiler metrics:</strong> Enable with Gradle flags to get a report of which composables are skippable and which classes are unstable:</p>
+            <pre style="background:#f8f8f8;padding:8px;border-radius:6px;font-size:.82rem;overflow-x:auto"><code>// build.gradle.kts
+kotlinOptions {
+    freeCompilerArgs += listOf(
+        "-P", "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=build/compose_reports"
+    )
+}</code></pre>
+            <p><strong>Interview tip:</strong> If a composable takes a <code>List&lt;Item&gt;</code> parameter, it will never be skipped even if the list didn't change — because <code>List</code> is an unstable interface. Wrap in <code>@Immutable data class</code> or use <code>ImmutableList</code>.</p>
           </div>
         </details>
       </div>
@@ -2012,6 +2099,147 @@ DisposableEffect(receiverType) {
     onDispose { eventBus.unregister(listener) }
 }`
 };
+
+// ---- System UI Bars ----
+CODE['sysbars-q'] = `// 1. In Activity.onCreate() — before setContent
+enableEdgeToEdge()   // androidx.activity:activity:1.8+
+
+setContent {
+    AppTheme {
+        // 2. Apply inset padding where content starts
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Home") },
+                    modifier = Modifier.statusBarsPadding()
+                )
+            },
+            modifier = Modifier.navigationBarsPadding()
+        ) { innerPadding ->
+            LazyColumn(contentPadding = innerPadding) {
+                // items...
+            }
+        }
+    }
+}`;
+
+CODE['sysbars-f'] = `// Manual edge-to-edge (pre-Activity 1.8 or for custom control)
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    WindowCompat.setDecorFitsSystemWindows(window, false)
+    setContent { AppContent() }
+}
+
+// Available inset padding modifiers
+Box(modifier = Modifier.fillMaxSize()) {
+
+    // Scrollable content with all safe padding
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = WindowInsets.systemBars.asPaddingValues()
+    ) { /* items */ }
+
+    // FAB sitting above the nav bar
+    FloatingActionButton(
+        onClick = {},
+        modifier = Modifier
+            .align(Alignment.BottomEnd)
+            .padding(16.dp)
+            .navigationBarsPadding()   // shifts above nav bar
+    ) { Icon(Icons.Default.Add, contentDescription = "Add") }
+}
+
+// Status bar icon appearance (light vs dark icons)
+val view = LocalView.current
+val isDark = !MaterialTheme.colorScheme.isLight
+SideEffect {
+    val window = (view.context as Activity).window
+    WindowInsetsControllerCompat(window, view).apply {
+        isAppearanceLightStatusBars  = !isDark   // dark icons on light bg
+        isAppearanceLightNavigationBars = !isDark
+    }
+}
+
+// Read raw inset sizes when you need exact values
+val statusBarHeight = WindowInsets.statusBars
+    .asPaddingValues()
+    .calculateTopPadding()
+
+// Scaffold: opt out of automatic inset handling
+Scaffold(
+    contentWindowInsets = WindowInsets.Zero   // handle insets yourself
+) { padding ->
+    Content(Modifier.padding(padding))
+}
+
+// displayCutoutPadding — avoids notch/punch-hole camera
+TopAppBar(modifier = Modifier.displayCutoutPadding())`;
+
+// ---- Stable / Immutable ----
+CODE['stable-q'] = `// @Immutable — all properties are val and never change
+@Immutable
+data class UserProfile(
+    val id: String,
+    val name: String,
+    val avatarUrl: String,
+)
+
+// @Stable — mutable but notifies Compose via State reads
+@Stable
+class CartState {
+    var itemCount by mutableStateOf(0)   // Compose tracks this
+    var total     by mutableStateOf(0.0)
+}`;
+
+CODE['stable-f'] = `// Problem — List<T> is unstable; this composable is NEVER skipped
+@Composable
+fun UserList(users: List<User>) { /* recomposes every time parent does */ }
+
+// Fix 1 — wrap in an @Immutable holder
+@Immutable
+data class UserList(val items: List<User>)
+
+@Composable
+fun UserList(users: UserList) { /* now skippable */ }
+
+// Fix 2 — use ImmutableList (kotlinx-collections-immutable)
+// implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.7")
+@Composable
+fun UserList(users: ImmutableList<User>) { /* stable, skippable */ }
+
+// @Stable on an interface — useful for fakes / design-time previews
+@Stable
+interface ThemeState {
+    val isDark: Boolean
+    fun toggle()
+}
+
+// data class with only stable fields — compiler infers stability, no annotation needed
+data class Config(
+    val timeout: Int,        // Int — stable
+    val label: String,       // String — stable
+    val enabled: Boolean,    // Boolean — stable
+)
+
+// Unstable because it contains a plain List<> (mutable interface)
+data class BadUiState(
+    val items: List<String>,  // unstable — use ImmutableList or @Immutable wrapper
+)
+
+// Correct
+@Immutable
+data class GoodUiState(
+    val items: List<String>,  // @Immutable promise covers contained types
+)
+
+// Enable Compose compiler stability report
+// build.gradle.kts (module)
+// kotlinOptions {
+//   freeCompilerArgs += listOf(
+//     "-P", "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=" +
+//            project.layout.buildDirectory.dir("compose_reports").get()
+//   )
+// }`;
 
 // ---- Text ----
 CODE['text-q'] = `// Center text horizontally AND vertically
