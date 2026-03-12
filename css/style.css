@@ -108,7 +108,9 @@ a { color: var(--primary); }
   gap: 2px;
   overflow-x: auto;
   flex: 1;
+  min-width: 0;          /* allow flex child to shrink and scroll */
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 .nav-tabs::-webkit-scrollbar { display: none; }
 
